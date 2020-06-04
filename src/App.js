@@ -1,25 +1,25 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import styled from "styled-components";
+import "antd/dist/antd.css";
+import CommonPanel from "./components/CommonPanel";
+import ActionPanel from "./components/ActionPanel";
+// import PersonPanel from "./components/PersonPanel";
+
+const Container = styled.div`
+  padding: 0 10%;
+`;
+const Title = styled.h1`
+  margin-top: 0.5em;
+`;
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container>
+      <Title>VAST 2020</Title>
+      <CommonPanel />
+      <ActionPanel />
+      {/* <PersonPanel /> */}
+    </Container>
   );
 }
 
