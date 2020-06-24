@@ -31,20 +31,33 @@ function readCSV() {
   );
 }
 
-function preprocess(raw) {
+function preprocessByEdge(raw) {
   const namevalues = raw
     .flatMap(({ key, data }) =>
       data.map((d) => ({ ...d, key, Time: +d.Time, eType: +d.eType }))
     )
-    .filter((d) => d.eType !== 4 && d.eType !== 5)
+    .filter((d) => d.eType !== 4 && d.eType !== 5) // 去掉 Demographics 和 Co-authorship
     .map((d) => ({
       ...d,
-      eType: d.eType === 2 || d.eType === 3 ? 7 : d.eType,
+      eType: d.eType === 2 || d.eType === 3 ? 7 : d.eType, // 将 Procurement 设置为一类
     }));
 
   const timeRange = d3.extent(namevalues, (d) => d.Time);
   const dataByEtype = Array.from(d3.groups(namevalues, (d) => d.eType));
   return { dataByEtype, timeRange };
+}
+
+function preprocessByKey(raw) {
+  // 暂时先保留电话和邮件的边
+  const dataByKey = raw.map(({ data, key }) => ({
+    key,
+    data: data
+      .map((d) => ({ ...d, key, Time: +d.Time, eType: +d.eType }))
+      .filter((d) => d.eType === 0 || d.eType === 1),
+  }));
+  return {
+    dataByKey,
+  };
 }
 
 export default {
@@ -53,6 +66,10 @@ export default {
     dataByEtype: [],
     timeRange: [0, 0],
     selectedTimeRange: [0, 0],
+    dataByKey: [],
+    graphs: ["template", "g1", "g2", "g3", "g4", "g5"],
+    selectedGraphs: ["template", "g1", "g2"],
+    timeOffSet: ["template", "g1", "g2", "g3", "g4", "g5"].map((d) => [d, 0]),
   },
   reducers: {
     save(state, action) {
@@ -65,14 +82,28 @@ export default {
       const { value } = action.payload;
       return { ...state, selectedTimeRange: value };
     },
+    setSelectedGraphs(state, action) {
+      const { value } = action.payload;
+      return { ...state, selectedGraphs: value };
+    },
+    setTimeOffSet(state, action) {
+      const { value } = action.payload;
+      return { ...state, timeOffSet: value };
+    },
   },
   effects: {
     *getData(_, { call, put }) {
       const raw = yield call(readCSV);
-      const { dataByEtype, timeRange } = preprocess(raw);
+      const { dataByEtype, timeRange } = preprocessByEdge(raw);
+      const { dataByKey } = preprocessByKey(raw);
       yield put({
         type: "save",
-        payload: { dataByEtype, timeRange, selectedTimeRange: timeRange },
+        payload: {
+          dataByEtype,
+          timeRange,
+          selectedTimeRange: timeRange,
+          dataByKey,
+        },
       });
     },
   },

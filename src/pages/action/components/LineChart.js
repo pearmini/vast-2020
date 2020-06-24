@@ -26,7 +26,6 @@ export default function ({ data, timeRange, selectedGraphs }) {
     ({ Time, key }) => Time >= start && Time <= end && graphSet.has(key)
   );
   const { dateList, countRange = [0, 0] } = aggregate(validList);
-  // console.log(dateList);
 
   const x = d3
     .scaleTime()
