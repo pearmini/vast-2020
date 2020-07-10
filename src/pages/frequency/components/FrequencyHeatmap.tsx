@@ -4,7 +4,6 @@ import { VegaLite } from "react-vega";
 import { TopLevelSpec as VegaLiteSpec } from 'vega-lite';
 import useCSV from "../../../hooks/use-csv";
 import { nameUrlMap } from "../../../data";
-import { typeChannelMap } from '../channel-defs';
 
 enum OriginalEdgeType {
   Phone = 0,
@@ -18,7 +17,7 @@ enum OriginalEdgeType {
 
 interface OriginalEdge {
   Source: number;
-  eType: number;
+  eType: OriginalEdgeType;
   Target: number;
   Time: number;
   Weight: number;
@@ -50,7 +49,7 @@ function preprocess(edges: OriginalEdge[]): ActivityRecord[] {
     if (time < minTime) {
       minTime = time;
     }
-    const type = typeChannelMap.get(eType)?.description ?? 'Unknown';
+    const type = OriginalEdgeType[eType];
     records.push({ id: records.length, type, person: source, time, counterpart: null, order: 0 });
     personOrderMap.set(source, (personOrderMap.get(source) ?? 0) + 1);
     if (eType === OriginalEdgeType.Phone || eType === OriginalEdgeType.Email) {
