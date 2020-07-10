@@ -1,7 +1,7 @@
-import useSWR from 'swr';
+import useSWR, { responseInterface as SWRResult } from 'swr';
 import Papa from 'papaparse';
 
-async function fetcher(url) {
+async function fetcher(url: string): Promise<any> {
   const response = await fetch(url);
   const text = await response.text();
   const { data, errors } = Papa.parse(text, { dynamicTyping: true, skipEmptyLines: true, header: true });
@@ -11,6 +11,6 @@ async function fetcher(url) {
   return data;
 }
 
-export default function useCSV(url) {
-  return useSWR(url, fetcher);
+export default function useCSV<Data, Error = any>(url: string): SWRResult<Data, Error> {
+  return useSWR<Data, Error>(url, fetcher);
 }
