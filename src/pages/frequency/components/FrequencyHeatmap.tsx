@@ -3,31 +3,7 @@ import PropTypes from "prop-types";
 import { VegaLite } from "react-vega";
 import { TopLevelSpec as VegaLiteSpec } from 'vega-lite';
 import useCSV from "../../../hooks/use-csv";
-import { nameUrlMap } from "../../../data";
-
-enum OriginalEdgeType {
-  Phone = 0,
-  Email = 1,
-  Sell = 2,
-  Buy = 3,
-  Author = 4,
-  Finance = 5,
-  Travel = 6,
-}
-
-interface OriginalEdge {
-  Source: number;
-  eType: OriginalEdgeType;
-  Target: number;
-  Time: number;
-  Weight: number;
-  SourceLocation?: number;
-  TargetLocation?: number;
-  SourceLatitude?: number;
-  SourceLongitude?: number;
-  TargetLatitude?: number;
-  TargetLongitude?: number;
-}
+import { OriginalEdge, OriginalEdgeType, nameUrlMap } from "../../../data";
 
 interface ActivityRecord {
   id: number;
