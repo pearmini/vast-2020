@@ -6,21 +6,48 @@ import { OriginalEdge, OriginalEdgeType, nameUrlMap } from "../../../data";
 import * as d3 from "d3";
 import _ from "lodash";
 
+// Since antd pollute the color, we must reset it.
 const Container = styled.div`
   color: black;
 `;
 
 interface ActivityRecord {
+  /**
+   * The unique index of this record.
+   */
   id: number;
+  /**
+   * The type of the record, in string.
+   */
   type: string;
+  /**
+   * The index of the related person.
+   */
   person: number;
+  /**
+   * The time of this activity, in ms.
+   */
   time: number;
+  /**
+   * If this activity involves two person, this will be the index of the other
+   * person's corresponding activity record.
+   */
   counterpart: number | null;
+  /**
+   * The order of this person.
+   */
   order: number;
 }
 
+/**
+ * According to the README, all time values are offset to Jan 1st, 2025.
+ */
 const DATASET_EPOCH = new Date(2025, 0, 1, 0, 0, 0);
 
+/**
+ * Transform edges to activity records.
+ * @param edges edges from original edges
+ */
 function preprocess(edges: OriginalEdge[]): ActivityRecord[] {
   const records: ActivityRecord[] = [];
   const personOrderMap = new Map<number, number>();
@@ -98,11 +125,6 @@ const FrequencyHeatmap: React.FC<FrequencyHeatmapProps> = ({
       .attr("viewBox", `0 0 ${width} ${height}`)
       .attr("width", width)
       .attr("height", height);
-    // const scaleX = d3
-    //   .scaleLinear()
-    //   .domain(d3.extent(records, (r) => r.time) as [number, number])
-    //   .range([margin.left, width - margin.right])
-    //   .nice();
     const scaleX = d3
       .scaleUtc()
       .domain(d3.extent(records, (r) => r.time) as [number, number])
@@ -220,6 +242,10 @@ const FrequencyHeatmap: React.FC<FrequencyHeatmapProps> = ({
 
     const links = svg.append("g").attr("class", "links");
 
+    /**
+     * Highlight given marks.
+     * @param marks the marks to be highlighted
+     */
     function highlight(
       marks: d3.Selection<SVGCircleElement, any, any, any>
     ): typeof marks {
@@ -230,6 +256,10 @@ const FrequencyHeatmap: React.FC<FrequencyHeatmapProps> = ({
         .attr("r", 2);
     }
 
+    /**
+     * Restore given marks to the original status.
+     * @param marks the marks to be restored
+     */
     function restore(
       marks: d3.Selection<SVGCircleElement, any, any, any>
     ): typeof marks {
@@ -240,6 +270,10 @@ const FrequencyHeatmap: React.FC<FrequencyHeatmapProps> = ({
         .attr("r", 4);
     }
 
+    /**
+     * Create a link from the given activity record
+     * @param from the origin activity record
+     */
     function link(from: ActivityRecord): void {
       if (records === undefined || from.counterpart === null) {
         return;
