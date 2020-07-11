@@ -6,7 +6,7 @@ import "antd/dist/antd.css";
 import ControlPanel from "./pages/control";
 import ActionPanel from "./pages/action";
 import StructurePanel from "./pages/structure";
-import FrequencyPanel from './pages/frequency';
+import FrequencyPanel from './pages/activity';
 
 const { TabPane } = Tabs;
 
@@ -31,7 +31,7 @@ function App() {
           <StructurePanel />
         </TabPane>
         <TabPane tab="人员可视化" key="3"></TabPane>
-        <TabPane tab="行为频率" key="4">
+        <TabPane tab="活动可视化" key="4">
           <FrequencyPanel />
         </TabPane>
       </Tabs>
