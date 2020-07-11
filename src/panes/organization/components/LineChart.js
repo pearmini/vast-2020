@@ -1,14 +1,11 @@
 import React, { useEffect } from "react";
-import styled from "styled-components";
 import * as d3All from "d3";
 import * as d3Array from "d3-array";
+
 const d3 = {
   ...d3All,
   ...d3Array,
 };
-
-const Container = styled.div``;
-const Title = styled.p``;
 
 export default function ({ data, timeRange, selectedGraphs }) {
   const width = 600,
@@ -109,37 +106,40 @@ export default function ({ data, timeRange, selectedGraphs }) {
   });
 
   return (
-    <Container>
-      <Title>{name}</Title>
-      <svg viewBox={[0, 0, width, height]}>
-        <g transform={`translate(${margin.left}, ${margin.top})`}>
-          {dateList.map(([key, data]) => (
-            <path
-              d={line(data)}
-              stroke={color(key)}
-              strokeWidth={1.5}
-              fill="none"
-              key={key}
-            />
-          ))}
-        </g>
-        <g className={`${name}-x-axis`} />
-        <g className={`${name}-y-axis`} />
-        <g transform={`translate(${width - margin.right}, ${margin.top})`}>
-          {selectedGraphs.map((key, index) => (
-            <g key={key} transform={`translate(0, ${index * 20})`}>
-              <rect
-                fill={color(key)}
-                width={10}
-                height={10}
-                x={-15}
-                y={-10}
-              ></rect>
-              <text>{key}</text>
-            </g>
-          ))}
-        </g>
-      </svg>
-    </Container>
+    <svg
+      viewBox={[0, 0, width, height]}
+      style={{ width: "100%", height: "100%" }}
+    >
+      <text transform={`translate(${width / 2}, 0)`} textAnchor="middle">
+        {name}
+      </text>
+      <g transform={`translate(${margin.left}, ${margin.top})`}>
+        {dateList.map(([key, data]) => (
+          <path
+            d={line(data)}
+            stroke={color(key)}
+            strokeWidth={1.5}
+            fill="none"
+            key={key}
+          />
+        ))}
+      </g>
+      <g className={`${name}-x-axis`} />
+      <g className={`${name}-y-axis`} />
+      <g transform={`translate(${width - margin.right}, ${margin.top})`}>
+        {selectedGraphs.map((key, index) => (
+          <g key={key} transform={`translate(0, ${index * 20})`}>
+            <rect
+              fill={color(key)}
+              width={10}
+              height={10}
+              x={-15}
+              y={-10}
+            ></rect>
+            <text>{key}</text>
+          </g>
+        ))}
+      </g>
+    </svg>
   );
 }

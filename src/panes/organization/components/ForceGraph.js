@@ -1,5 +1,4 @@
 import React from "react";
-import styled from "styled-components";
 import * as d3All from "d3";
 import * as d3Array from "d3-array";
 
@@ -8,10 +7,7 @@ const d3 = {
   ...d3Array,
 };
 
-const Container = styled.div``;
-const Title = styled.p``;
-
-export default function ({ d, timeRange }) {
+export default function ({ d, timeRange, edges, fields }) {
   const width = 600,
     height = 400,
     margin = { top: 10, right: 60, bottom: 30, left: 30 },
@@ -19,7 +15,10 @@ export default function ({ d, timeRange }) {
     innerHeight = height - margin.top - margin.bottom;
   const { key, data } = d;
   const [start, end] = timeRange;
-  const validData = data.filter((d) => d.Time >= start && d.Time < end);
+  const edgeSet = new Set(edges);
+  const validData = data.filter(
+    (d) => d.Time >= start && d.Time < end && edgeSet.has(d.eType)
+  );
   const { links, nodes } = getGraphData(validData);
   const simulation = d3
     .forceSimulation(nodes)
@@ -54,6 +53,7 @@ export default function ({ d, timeRange }) {
       source: +d.Source,
       target: +d.Target,
       value: 1,
+      eType: d.eType,
     }));
 
     const combine = (data) => {
@@ -76,25 +76,45 @@ export default function ({ d, timeRange }) {
     return { nodes, links: combine(links) };
   }
 
+  console.log(fields);
+  const color = d3.scaleOrdinal().domain(edges).range(d3.schemeCategory10);
+
   return (
-    <Container>
-      <Title>{key}</Title>
-      <svg viewBox={[0, 0, width, height]}>
-        {links.map((d) => (
-          <line
-            key={d.index}
-            x1={d.source.x}
-            y1={d.source.y}
-            x2={d.target.x}
-            y2={d.target.y}
-            strokeWidth={Math.sqrt(d.value)}
-            stroke={"#999"}
-          />
+    <svg
+      viewBox={[0, 0, width, height]}
+      style={{ width: "100%", height: "100%" }}
+    >
+      <text transform={`translate(${width / 2}, 0)`} textAnchor="middle">
+        {key}
+      </text>
+      {links.map((d) => (
+        <line
+          key={d.index}
+          x1={d.source.x}
+          y1={d.source.y}
+          x2={d.target.x}
+          y2={d.target.y}
+          strokeWidth={Math.sqrt(d.value)}
+          stroke={color(d.eType)}
+        />
+      ))}
+      {nodes.map((d) => (
+        <circle key={d.id} r={5} cx={d.x} cy={d.y}></circle>
+      ))}
+      <g transform={`translate(${width - margin.right}, ${margin.top})`}>
+        {edges.map((key, index) => (
+          <g key={key} transform={`translate(0, ${index * 20})`}>
+            <rect
+              fill={color(key)}
+              width={10}
+              height={10}
+              x={-15}
+              y={-10}
+            ></rect>
+            <text>{fields.find((d) => d.value === key).name}</text>
+          </g>
         ))}
-        {nodes.map((d) => (
-          <circle key={d.id} r={5} cx={d.x} cy={d.y}></circle>
-        ))}
-      </svg>
-    </Container>
+      </g>
+    </svg>
   );
 }

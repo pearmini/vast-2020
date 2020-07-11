@@ -1,36 +1,84 @@
 import React from "react";
 import styled from "styled-components";
-import { Tabs } from "antd";
-import "antd/dist/antd.css";
 
-import ControlPanel from "./pages/control";
-import ActionPanel from "./pages/action";
-import StructurePanel from "./pages/structure";
+import SiderPane from "./panes/sider";
+import OrganizationPane from "./panes/organization";
+import PersonnelPane from "./panes/personnel";
 
-const { TabPane } = Tabs;
 
 const Container = styled.div`
-  padding: 0 10%;
+  height: 100%;
+  width: 100%;
 `;
 
-const Title = styled.h1`
-  margin-top: 0.5em;
+const Header = styled.div`
+  height: 49px;
+  background: #fff;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+`;
+
+const Title = styled.span`
+  font-weight: bold;
+  font-size: 20px;
+  color: #000;
+`;
+
+const Content = styled.div`
+  display: flex;
+  height: calc(100% - 49px);
+  width: 100%;
+`;
+
+const Sider = styled.div`
+  background: #38425d;
+  height: 100%;
+  width: 200px;
+  color: #fff;
+`;
+
+const Left = styled.div`
+  width: calc(60% - 4px);
+  height: 100%;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 8px;
+`;
+
+const Right = styled.div`
+  width: calc(40% - 4px);
+  height: 100%;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 8px;
+`;
+
+const Main = styled.div`
+  background: #e2e9f3;
+  width: calc(100% - 200px);
+  display: flex;
+  padding: 8px;
+  justify-content: space-between;
 `;
 
 function App() {
   return (
     <Container>
-      <Title>VAST 2020</Title>
-      <ControlPanel />
-      <Tabs defaultActiveKey="1">
-        <TabPane tab="行为可视化" key="1">
-          <ActionPanel />
-        </TabPane>
-        <TabPane tab="组织结构可视化" key="2">
-          <StructurePanel />
-        </TabPane>
-        <TabPane tab="人员可视化" key="3"></TabPane>
-      </Tabs>
+      <Header>
+        <Title>VAST 2020</Title>
+      </Header>
+      <Content>
+        <Sider>
+          <SiderPane />
+        </Sider>
+        <Main>
+          <Left width={60}>
+            <OrganizationPane />
+          </Left>
+          <Right width={40}>
+            <PersonnelPane />
+          </Right>
+        </Main>
+      </Content>
     </Container>
   );
 }

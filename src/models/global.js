@@ -53,7 +53,11 @@ function preprocessByKey(raw) {
     key,
     data: data
       .map((d) => ({ ...d, key, Time: +d.Time, eType: +d.eType }))
-      .filter((d) => d.eType === 0 || d.eType === 1),
+      .map((d) => ({
+        ...d,
+        eType: d.eType === 2 || d.eType === 3 ? 7 : d.eType, // 将 Procurement 设置为一类
+      }))
+      // .filter((d) => d.eType === 0 || d.eType === 1)
   }));
   return {
     dataByKey,
@@ -68,8 +72,28 @@ export default {
     selectedTimeRange: [0, 0],
     dataByKey: [],
     graphs: ["template", "g1", "g2", "g3", "g4", "g5"],
-    selectedGraphs: ["template", "g1", "g2"],
+    selectedGraphs: ["template", "g1"],
     timeOffSet: ["template", "g1", "g2", "g3", "g4", "g5"].map((d) => [d, 0]),
+    selectedFields: [0, 1],
+    fields: [
+      {
+        name: "Phone",
+        value: 0,
+      },
+      {
+        name: "Email",
+        value: 1,
+      },
+      {
+        name: "Transaction",
+        value: 7,
+      },
+      {
+        name: "Travel",
+        value: 6,
+      },
+    ],
+    selectedPeople: [],
   },
   reducers: {
     save(state, action) {
@@ -78,17 +102,9 @@ export default {
         ...action.payload,
       };
     },
-    setSelectedTimeRange(state, action) {
-      const { value } = action.payload;
-      return { ...state, selectedTimeRange: value };
-    },
-    setSelectedGraphs(state, action) {
-      const { value } = action.payload;
-      return { ...state, selectedGraphs: value };
-    },
-    setTimeOffSet(state, action) {
-      const { value } = action.payload;
-      return { ...state, timeOffSet: value };
+    set(state, action) {
+      const { key, value } = action.payload;
+      return { ...state, [key]: value };
     },
   },
   effects: {

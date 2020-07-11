@@ -2,6 +2,7 @@ import React from "react";
 import dva from "dva";
 import App from "./App";
 import globalModel from "./models/global";
+import "antd/dist/antd.css";
 import "./index.css";
 
 const app = new dva();
