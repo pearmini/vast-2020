@@ -56,8 +56,7 @@ function preprocessByKey(raw) {
       .map((d) => ({
         ...d,
         eType: d.eType === 2 || d.eType === 3 ? 7 : d.eType, // 将 Procurement 设置为一类
-      }))
-      // .filter((d) => d.eType === 0 || d.eType === 1)
+      })),
   }));
   return {
     dataByKey,
