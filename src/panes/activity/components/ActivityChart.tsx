@@ -6,9 +6,11 @@ import { OriginalEdge, OriginalEdgeType, nameUrlMap } from "../../../data";
 import * as d3 from "d3";
 import _ from "lodash";
 import { Spin } from "antd";
+import { useResizeObserver } from "beautiful-react-hooks";
 
 // Since antd pollute the color, we must reset it.
 const Container = styled.div`
+  width: 100%;
   color: black;
   display: flex;
   flex-direction: column;
@@ -122,13 +124,16 @@ const FrequencyHeatmap: React.FC<FrequencyHeatmapProps> = ({
     [data]
   );
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerRect = useResizeObserver(
+    containerRef as React.MutableRefObject<HTMLElement>
+  );
 
   useEffect(() => {
     if (containerRef.current === null || records === undefined) {
       return;
     }
-    chart(containerRef, records, margin);
-  }, [records, margin]);
+    chart(containerRef.current, records, containerRect?.width, margin);
+  }, [records, margin, containerRect]);
 
   return (
     <Container ref={containerRef}>
@@ -151,13 +156,14 @@ FrequencyHeatmap.propTypes = {
 export default FrequencyHeatmap;
 
 function chart(
-  containerRef: React.MutableRefObject<HTMLDivElement | null>,
+  containerElement: HTMLDivElement,
   records: ActivityRecord[],
+  predefinedWidth: number | undefined,
   margin: { left: number; right: number; top: number; bottom: number }
 ): void {
-  const width = 1200;
+  const width = predefinedWidth ?? containerElement.getBoundingClientRect().width;
   const height = 400;
-  const container = d3.select(containerRef.current);
+  const container = d3.select(containerElement);
   container.selectAll("svg").remove();
   const svg = container
     .append("svg")
