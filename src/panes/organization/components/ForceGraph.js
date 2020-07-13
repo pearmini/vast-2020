@@ -7,12 +7,17 @@ const d3 = {
   ...d3Array,
 };
 
-export default function ({ d, timeRange, edges, fields }) {
+export default function ({
+  d,
+  timeRange,
+  edges,
+  fields,
+  set,
+  selectedPersonnel,
+}) {
   const width = 600,
-    height = 400,
-    margin = { top: 10, right: 60, bottom: 30, left: 30 },
-    innerWidth = width - margin.left - margin.right,
-    innerHeight = height - margin.top - margin.bottom;
+    height = 600,
+    margin = { top: 10, right: 60, bottom: 30, left: 30 };
   const { key, data } = d;
   const [start, end] = timeRange;
   const edgeSet = new Set(edges);
@@ -27,7 +32,7 @@ export default function ({ d, timeRange, edges, fields }) {
       d3.forceLink(links).id((d) => d.id)
     )
     .force("charge", d3.forceManyBody())
-    .force("center", d3.forceCenter(innerWidth / 2, innerHeight / 2))
+    .force("center", d3.forceCenter(width / 2, height / 2))
     .stop();
 
   for (
@@ -76,7 +81,6 @@ export default function ({ d, timeRange, edges, fields }) {
     return { nodes, links: combine(links) };
   }
 
-  console.log(fields);
   const color = d3.scaleOrdinal().domain(edges).range(d3.schemeCategory10);
 
   return (
@@ -99,7 +103,25 @@ export default function ({ d, timeRange, edges, fields }) {
         />
       ))}
       {nodes.map((d) => (
-        <circle key={d.id} r={5} cx={d.x} cy={d.y}></circle>
+        <circle
+          key={d.id}
+          r={5}
+          cx={d.x}
+          cy={d.y}
+          cursor="pointer"
+          onClick={() => {
+            const i = selectedPersonnel.indexOf("" + d.id);
+            const newSelectedPersonnel = [...selectedPersonnel];
+            if (i === -1) {
+              newSelectedPersonnel.push("" + d.id);
+            } else {
+              newSelectedPersonnel.splice(i, 1);
+            }
+            set("selectedPersonnel", newSelectedPersonnel);
+          }}
+        >
+          <title>{d.id}</title>
+        </circle>
       ))}
       <g transform={`translate(${width - margin.right}, ${margin.top})`}>
         {edges.map((key, index) => (

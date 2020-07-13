@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { connect } from "dva";
-import { Slider, Select } from "antd";
+import { Slider, Select, DatePicker } from "antd";
 import LineChart from "./components/LineChart";
 import ForceGraph from "./components/ForceGraph";
 import Chart from "../../components/Chart";
+import moment from "moment";
 
 const { Option } = Select;
+const { RangePicker } = DatePicker;
 const Container = styled.div`
   width: 100%;
   height: 100%;
@@ -46,10 +48,6 @@ const Card = styled.div`
     margin-right: 4px;
     width: 100px;
   }
-`;
-
-const RangeSlider = styled(Slider)`
-  width: calc(100% - 100px);
 `;
 
 const OffsetSlider = styled(Slider)`
@@ -97,6 +95,7 @@ export default connect(({ global }) => ({ ...global }), {
   getData,
   dataByEtype,
   dataByKey,
+  selectedPersonnel,
 }) {
   const [selectedName, setSelectedName] = useState("template");
   const validTimeOffset = timeOffSet.filter(([name]) => {
@@ -151,13 +150,13 @@ export default connect(({ global }) => ({ ...global }), {
       <Control>
         <Card>
           <span>Time Range</span>
-          <RangeSlider
-            range
-            min={timeRange[0]}
-            max={timeRange[1]}
-            value={selectedTimeRange}
-            onChange={(value) => set("selectedTimeRange", value)}
-            tipFormatter={(d) => new Date(d * 1000).toLocaleDateString()}
+          <RangePicker
+            onChange={(_, [startString, endString]) => {
+              const start = (new Date(startString).getTime() / 1000) | 0;
+              const end = (new Date(endString).getTime() / 1000) | 0;
+              set("selectedTimeRange", [start, end]);
+            }}
+            value={[moment(timeRange[0] * 1000), moment(timeRange[1] * 1000)]}
           />
         </Card>
         {selectedTimeOffset && (
@@ -192,7 +191,7 @@ export default connect(({ global }) => ({ ...global }), {
         )}
       </Control>
       <SubPane>
-        <SubTitle>Action</SubTitle>
+        <SubTitle>Activity</SubTitle>
         <MyRow>
           <Wrapper width={Math.max(lineData.length * 50, 100) + "%"}>
             {lineData.map((d) => (
@@ -209,6 +208,7 @@ export default connect(({ global }) => ({ ...global }), {
                   data={d}
                   timeRange={selectedTimeRange}
                   selectedGraphs={selectedGraphs}
+                  selectedFeilds={selectedFields}
                 />
               </Chart>
             ))}
@@ -238,6 +238,8 @@ export default connect(({ global }) => ({ ...global }), {
                     timeRange={selectedTimeRange}
                     edges={selectedFields}
                     fields={fields}
+                    set={set}
+                    selectedPersonnel={selectedPersonnel}
                   />
                 </Chart>
               ))}

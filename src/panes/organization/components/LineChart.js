@@ -7,7 +7,7 @@ const d3 = {
   ...d3Array,
 };
 
-export default function ({ data, timeRange, selectedGraphs }) {
+export default function ({ data, timeRange, selectedGraphs, selectedFeilds }) {
   const width = 600,
     height = 400,
     margin = { top: 10, right: 60, bottom: 30, left: 30 },
@@ -20,7 +20,7 @@ export default function ({ data, timeRange, selectedGraphs }) {
     .map((d) => [format(d), 0]);
   const graphSet = new Set(selectedGraphs);
   const validList = list.filter(
-    ({ Time, key }) => Time >= start && Time <= end && graphSet.has(key)
+    ({ Time, key}) => Time >= start && Time <= end && graphSet.has(key)
   );
   const { dateList, countRange = [0, 0] } = aggregate(validList);
 

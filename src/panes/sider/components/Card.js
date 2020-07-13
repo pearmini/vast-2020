@@ -6,6 +6,8 @@ import {
   DeleteFilled,
   UploadOutlined,
   PlusCircleOutlined,
+  EyeInvisibleFilled,
+  EyeFilled,
 } from "@ant-design/icons";
 
 const Container = styled.div`
@@ -56,9 +58,6 @@ const ExtraItem = styled.div`
 
 const Icon = styled.span`
   cursor: pointer;
-  &:hover {
-    color: white;
-  }
 `;
 
 const PopoverContainer = styled.div`
@@ -67,11 +66,12 @@ const PopoverContainer = styled.div`
 
 export default function ({
   onRemove,
-  extraList,
+  extraList = [],
   list,
   onAdd,
   onUpload,
   title,
+  type,
   value = (d) => d,
 }) {
   const popoverContent = (
@@ -90,26 +90,43 @@ export default function ({
     <Container>
       <Header>
         {title}
-        <span>
-          {onUpload && <UploadOutlined />}
-          <Popover
-            arrowPointAtCenter
-            placement="bottomRight"
-            content={popoverContent}
-          >
-            <PlusCircleOutlined />
-          </Popover>
-        </span>
+        {type !== "combine" && (
+          <span>
+            {onUpload && <UploadOutlined />}
+            {onAdd && (
+              <Popover
+                arrowPointAtCenter
+                placement="bottomRight"
+                content={popoverContent}
+              >
+                <PlusCircleOutlined />
+              </Popover>
+            )}
+          </span>
+        )}
       </Header>
       <div>
         {list.map((d, index) => (
           <DataItem key={value(d)}>
             <span>{value(d)}</span>
             <Icon>
-              <DeleteFilled onClick={() => onRemove(index)} />
+              {type === "combine" ? (
+                <EyeFilled onClick={() => onRemove(index)} />
+              ) : (
+                <DeleteFilled onClick={() => onRemove(index)} />
+              )}
             </Icon>
           </DataItem>
         ))}
+        {type === "combine" &&
+          extraList.map((d, index) => (
+            <DataItem key={value(d)}>
+              <span>{value(d)}</span>
+              <Icon>
+                <EyeInvisibleFilled onClick={() => onAdd(index)} />
+              </Icon>
+            </DataItem>
+          ))}
       </div>
     </Container>
   );

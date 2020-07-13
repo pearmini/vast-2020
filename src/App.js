@@ -1,14 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 
 import SiderPane from "./panes/sider";
 import OrganizationPane from "./panes/organization";
 import PersonnelPane from "./panes/personnel";
 
-
 const Container = styled.div`
   height: 100%;
   width: 100%;
+  background: #e2e9f3;
 `;
 
 const Header = styled.div`
@@ -34,7 +34,7 @@ const Content = styled.div`
 const Sider = styled.div`
   background: #38425d;
   height: 100%;
-  width: 200px;
+  width: ${(props) => props.width}px;
   color: #fff;
 `;
 
@@ -54,23 +54,26 @@ const Right = styled.div`
 
 const Main = styled.div`
   background: #e2e9f3;
-  width: calc(100% - 200px);
+  width: calc(100% - ${(props) => props.width}px);
   display: flex;
   padding: 8px;
   justify-content: space-between;
+  margin-left: ${(props) => (props.hide ? 20 : 0)}px;
 `;
 
 function App() {
+  const [siderWidth, setSiderWidth] = useState(200);
+
   return (
     <Container>
       <Header>
         <Title>VAST 2020</Title>
       </Header>
       <Content>
-        <Sider>
-          <SiderPane />
+        <Sider width={siderWidth}>
+          <SiderPane setWidth={setSiderWidth} width={siderWidth} />
         </Sider>
-        <Main>
+        <Main width={siderWidth} hide={siderWidth === 0}>
           <Left width={60}>
             <OrganizationPane />
           </Left>
