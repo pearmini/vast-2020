@@ -16,7 +16,7 @@ export default function ({
   selectedPersonnel,
 }) {
   const width = 600,
-    height = 600,
+    height = 400,
     margin = { top: 10, right: 60, bottom: 30, left: 30 };
   const { key, data } = d;
   const [start, end] = timeRange;

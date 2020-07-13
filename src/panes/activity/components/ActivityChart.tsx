@@ -6,9 +6,11 @@ import { OriginalEdge, OriginalEdgeType, nameUrlMap } from "../../../data";
 import * as d3 from "d3";
 import _ from "lodash";
 import { Spin } from "antd";
+import { useResizeObserver } from "beautiful-react-hooks";
 
 // Since antd pollute the color, we must reset it.
 const Container = styled.div`
+  width: 100%;
   color: black;
   display: flex;
   flex-direction: column;
@@ -122,13 +124,16 @@ const FrequencyHeatmap: React.FC<FrequencyHeatmapProps> = ({
     [data]
   );
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerRect = useResizeObserver(
+    containerRef as React.MutableRefObject<HTMLElement>
+  );
 
   useEffect(() => {
     if (containerRef.current === null || records === undefined) {
       return;
     }
-    chart(containerRef, records, margin);
-  }, [records, margin]);
+    chart(containerRef.current, records, containerRect?.width, margin);
+  }, [records, margin, containerRect]);
 
   return (
     <Container ref={containerRef}>
@@ -151,13 +156,15 @@ FrequencyHeatmap.propTypes = {
 export default FrequencyHeatmap;
 
 function chart(
-  containerRef: React.MutableRefObject<HTMLDivElement | null>,
+  containerElement: HTMLDivElement,
   records: ActivityRecord[],
+  predefinedWidth: number | undefined,
   margin: { left: number; right: number; top: number; bottom: number }
 ): void {
-  const width = 1200;
+  const width =
+    predefinedWidth ?? containerElement.getBoundingClientRect().width;
   const height = 400;
-  const container = d3.select(containerRef.current);
+  const container = d3.select(containerElement);
   container.selectAll("svg").remove();
   const svg = container
     .append("svg")
@@ -169,12 +176,9 @@ function chart(
     .domain(d3.extent(records, (r) => r.time) as [number, number])
     .range([margin.left, width - margin.right])
     .nice();
-  const allPersons = _.uniq(
-    records.map((x) => (x.person as unknown) as string)
-  );
   const scaleY = d3
     .scalePoint()
-    .domain(allPersons)
+    .domain(_.uniq(records.map((x) => (x.person as unknown) as string)))
     .range([height - margin.bottom, margin.top])
     .padding(1);
   const scaleColor = d3.scaleOrdinal(d3.schemeCategory10);
@@ -284,6 +288,60 @@ function chart(
     });
 
   const links = svg.append("g").attr("class", "links");
+
+  const FONT_SIZE = 12;
+  const lineHeight = 16;
+
+  const legendPosition = [margin.left + 16, margin.top + 16];
+  const legendPadding = [12, 8];
+  const legendBackground = svg
+    .append("rect")
+    .attr("fill", "#ffffff")
+    .attr("stroke", "#000000")
+    .attr("stroke-width", 1)
+    .attr("opacity", 0.5)
+    .attr(
+      "transform",
+      `translate(${legendPosition[0] - legendPadding[0] / 2}, ${
+        legendPosition[1] - legendPadding[1] / 2
+      })`
+    );
+
+  const legend = svg
+    .append("g")
+    .attr("class", "legend")
+    .attr(
+      "transform",
+      `translate(${legendPosition[0] + DEFAULT_RADIUS}, ${legendPosition[1]})`
+    );
+
+  legend
+    .selectAll("g")
+    .data(scaleColor.domain())
+    .enter()
+    .append("g")
+    .each(function (d, i) {
+      const h = d3
+        .select(this)
+        .attr("transform", `translate(0, ${i * lineHeight})`);
+      h.append("circle")
+        .attr("r", DEFAULT_RADIUS)
+        .attr("cy", lineHeight / 2)
+        .attr("fill", scaleColor(d));
+      const label = h.append("text")
+        .attr("x", 2 * DEFAULT_RADIUS + 4)
+        .attr("font-size", FONT_SIZE)
+        .attr("dominant-baseline", "middle")
+        .text(d);
+      label.attr('y', (label.node()?.getBoundingClientRect().height ?? lineHeight) / 2);
+    });
+
+  const legendBounds = legend.node()?.getBoundingClientRect();
+  if (legendBounds) {
+    console.log(legendBounds);
+    legendBackground.attr("width", legendBounds.width + legendPadding[0]);
+    legendBackground.attr("height", legendBounds.height + legendPadding[1]);
+  }
 
   /**
    * Highlight given marks.

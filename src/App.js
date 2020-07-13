@@ -4,6 +4,7 @@ import styled from "styled-components";
 import SiderPane from "./panes/sider";
 import OrganizationPane from "./panes/organization";
 import PersonnelPane from "./panes/personnel";
+import ActivityPane from "./panes/activity";
 
 const Container = styled.div`
   height: 100%;
@@ -78,6 +79,7 @@ function App() {
             <OrganizationPane />
           </Left>
           <Right width={40}>
+            {/* <ActivityPane /> */}
             <PersonnelPane />
           </Right>
         </Main>
