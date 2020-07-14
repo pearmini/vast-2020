@@ -120,20 +120,6 @@ export default function ({ data, timeRange, selectedGraphs, color, size }) {
       </g>
       <g className={`${name}-x-axis`} />
       <g className={`${name}-y-axis`} />
-      {/* <g transform={`translate(${width - margin.right}, ${margin.top})`}>
-        {selectedGraphs.map((key, index) => (
-          <g key={key} transform={`translate(0, ${index * 20})`}>
-            <rect
-              fill={color(key)}
-              width={10}
-              height={10}
-              x={-15}
-              y={-10}
-            ></rect>
-            <text>{key}</text>
-          </g>
-        ))}
-      </g> */}
     </svg>
   );
 }
