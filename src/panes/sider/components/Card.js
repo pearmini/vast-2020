@@ -1,12 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import { Popover } from "antd";
+import { Popover, Input, Modal } from "antd";
 
 import {
   DeleteFilled,
-  UploadOutlined,
   PlusCircleOutlined,
   EyeInvisibleFilled,
+  PlusSquareOutlined,
   EyeFilled,
 } from "@ant-design/icons";
 
@@ -84,7 +84,7 @@ export default function ({
   extraList = [],
   list,
   onAdd,
-  onUpload,
+  onCreate,
   title,
   type,
   value = (d) => d,
@@ -92,6 +92,8 @@ export default function ({
   onMouseOver,
   onMouseLeave,
 }) {
+  const [showInput, setShowInput] = useState(false);
+  const [inputValue, setInputValue] = useState("");
   const popoverContent = (
     <PopoverContainer>
       {extraList.length === 0
@@ -106,11 +108,37 @@ export default function ({
 
   return (
     <Container onMouseLeave={() => onMouseLeave && onMouseLeave()}>
+      <Modal
+        title="Create a new graph"
+        visible={showInput}
+        onOk={() => {
+          if (inputValue !== "") {
+            setShowInput(false);
+            setInputValue("");
+            onCreate(inputValue);
+          } else {
+            alert("Graph key can not be empty!");
+          }
+        }}
+        okText="Add"
+        onCancel={() => {
+          setShowInput(false);
+          setInputValue("");
+        }}
+      >
+        <Input
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          placeholder="Please input graph key..."
+        ></Input>
+      </Modal>
       <Header>
         {title}
         {type !== "combine" && (
           <span>
-            {onUpload && <UploadOutlined />}
+            {onCreate && (
+              <PlusSquareOutlined onClick={() => setShowInput(true)} />
+            )}
             {onAdd && (
               <Popover
                 arrowPointAtCenter
