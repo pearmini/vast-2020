@@ -7,7 +7,6 @@ import g3 from "../data/g3.csv";
 import g4 from "../data/g4.csv";
 import g5 from "../data/g5.csv";
 import dc from "../data/dc.csv";
-import { map } from "lodash";
 
 const d3 = {
   ...d3All,

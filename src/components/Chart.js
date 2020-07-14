@@ -1,20 +1,18 @@
-import React from "react";
+import React, { useRef } from "react";
 import styled from "styled-components";
+import useSize from "../hooks/useSize";
 
 const Container = styled.div`
   width: ${(props) => props.width || "100%"};
   height: ${(props) => props.height || "100%"};
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #fff;
-  padding: 20px 8px;
 `;
 
 export default function ({ width, height, children }) {
+  const ref = useRef(null);
+  const { width: containerWidth, height: containerHeight } = useSize(ref);
   return (
-    <Container width={width} height={height}>
-      {children}
+    <Container width={width} height={height} ref={ref}>
+      {children(containerWidth, containerHeight)}
     </Container>
   );
 }

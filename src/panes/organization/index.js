@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { connect } from "dva";
-import { Slider, Select, DatePicker } from "antd";
+import { Slider, Select, DatePicker, Tabs } from "antd";
 
 import Chart from "../../components/Chart";
 
@@ -11,8 +11,10 @@ import ActivityChart from "./components/ActivityChart";
 import Map from "./components/Map";
 import moment from "moment";
 
+const { TabPane } = Tabs;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
+
 const Container = styled.div`
   width: 100%;
   height: 100%;
@@ -28,7 +30,7 @@ const SubTitle = styled.h3``;
 const SubPane = styled.div`
   width: 100%;
   margin-top: 10px;
-  height: calc(${(props) => props.width || 50}% - 55px);
+  height: calc(${(props) => props.height || 50}% - 55px);
   display: flex;
   flex-direction: column;
 `;
@@ -76,11 +78,6 @@ const Wrapper = styled.div`
   height: 100%;
 `;
 
-const Row = styled.div`
-  display: flex;
-  margin-bottom: 5px;
-`;
-
 export default connect(({ global }) => ({ ...global }), {
   setTimeOffSet: (value) => ({
     type: "global/setTimeOffSet",
@@ -110,7 +107,6 @@ export default connect(({ global }) => ({ ...global }), {
   mapData,
   highlightPersonnel,
 }) {
-  const [activityType, setActivityType] = useState("Scatter");
   const [selectedName, setSelectedName] = useState("template");
   const validTimeOffset = timeOffSet.filter(([name]) => {
     const set = new Set(selectedGraphs);
@@ -223,8 +219,8 @@ export default connect(({ global }) => ({ ...global }), {
           </Card>
         )}
       </Control>
-      <SubPane width={40}>
-        <SubTitle>Overview</SubTitle>
+      <SubPane height={40}>
+        <SubTitle>Frequency</SubTitle>
         <MyRow>
           <Wrapper width={Math.max(lineData.length * 50, 100) + "%"}>
             {lineData.map((d) => (
@@ -237,111 +233,112 @@ export default connect(({ global }) => ({ ...global }), {
                 }
                 height="100%"
               >
-                <LineChart
-                  data={d}
-                  timeRange={selectedTimeRange}
-                  selectedGraphs={selectedGraphs}
-                  color={colorScaleForData}
-                />
+                {(width, height) => (
+                  <LineChart
+                    data={d}
+                    timeRange={selectedTimeRange}
+                    selectedGraphs={selectedGraphs}
+                    color={colorScaleForData}
+                    size={[width, height]}
+                  />
+                )}
               </Chart>
             ))}
           </Wrapper>
         </MyRow>
       </SubPane>
-      <SubPane width={60}>
-        <Row>
-          <SubTitle>Activity</SubTitle>
-          <Select
-            style={{ width: 150, marginLeft: 10 }}
-            value={activityType}
-            onChange={setActivityType}
-          >
-            <Option value="Scatter">Scatter</Option>
-            <Option value="ForceMap">ForceMap</Option>
-            <Option value="Map">Map</Option>
-          </Select>
-        </Row>
-        <MyRow>
-          <Wrapper
-            width={
-              Math.max(
-                activityType === "Scatter"
-                  ? selectedGraphs.length * 50
-                  : activityType === "ForceMap"
-                  ? selectedGraphs.length * 50
-                  : connectionData.length * 50,
-                100
-              ) + "%"
-            }
-          >
-            {activityType === "Scatter"
-              ? selectedGraphs.map((name) => (
-                  <Chart
-                    key={name}
-                    width={
-                      selectedGraphs.length
-                        ? `calc(${(100 / selectedGraphs.length) | 0}% - 4px)`
-                        : "100%"
-                    }
-                    height="100%"
+      <SubPane height={60}>
+        <Chart>
+          {(width, height) => (
+            <>
+              <SubTitle>Activity</SubTitle>{" "}
+              <Tabs defaultActiveKey="1">
+                <TabPane tab="Temporal" key="1" style={{ overflow: "auto" }}>
+                  <Wrapper
+                    width={Math.max(selectedGraphs.length * 50, 100) + "%"}
                   >
-                    <ActivityChart
-                      key={name}
-                      name={name}
-                      selectedPersonnel={selectedPersonnel}
-                      set={set}
-                      scaleColor={colorScaleForChannels}
-                      highlightPersonnel={highlightPersonnel}
-                    />
-                  </Chart>
-                ))
-              : activityType === "ForceMap"
-              ? forceData
-                  .filter((d) => {
-                    const set = new Set(selectedGraphs);
-                    return set.has(d.key);
-                  })
-                  .map((d) => (
-                    <Chart
-                      key={d.key}
-                      width={
-                        lineData.length
-                          ? `calc(${(100 / forceData.length) | 0}% - 4px)`
-                          : "100%"
-                      }
-                    >
-                      <ForceGraph
-                        d={d}
-                        timeRange={selectedTimeRange}
-                        edges={selectedFields}
-                        fields={fields}
-                        set={set}
-                        selectedPersonnel={selectedPersonnel}
-                        color={colorScaleForChannels}
-                        highlightPersonnel={highlightPersonnel}
-                      />
-                    </Chart>
-                  ))
-              : connectionData.map((d) => (
-                  <Chart
-                    key={d.name}
-                    width={
-                      connectionData.length
-                        ? `calc(${(100 / connectionData.length) | 0}% - 4px)`
-                        : "100%"
-                    }
-                    height="100%"
+                    {selectedGraphs.map((name) => (
+                      <div
+                        style={{
+                          width: selectedGraphs.length ? width / 2 - 4 : width,
+                          height: height - 98,
+                        }}
+                      >
+                        <ActivityChart
+                          key={name}
+                          name={name}
+                          selectedPersonnel={selectedPersonnel}
+                          set={set}
+                          scaleColor={colorScaleForChannels}
+                          highlightPersonnel={highlightPersonnel}
+                          width={selectedGraphs.length ? width / 2 - 4 : width}
+                          height={height - 98}
+                        />
+                      </div>
+                    ))}
+                  </Wrapper>
+                </TabPane>
+                <TabPane tab="Space" key="2" style={{ overflow: "auto" }}>
+                  <Wrapper
+                    width={Math.max(connectionData.length * 50, 100) + "%"}
                   >
-                    <Map
-                      location={mapData}
-                      connectionData={d}
-                      color={colorScaleForChannels}
-                      fields={fields}
-                    ></Map>
-                  </Chart>
-                ))}
-          </Wrapper>
-        </MyRow>
+                    {connectionData.map((d) => (
+                      <div
+                        style={{
+                          width: connectionData.length ? width / 2 - 4 : width,
+                          height: height - 98,
+                        }}
+                      >
+                        <Map
+                          location={mapData}
+                          connectionData={d}
+                          color={colorScaleForChannels}
+                          fields={fields}
+                          size={[
+                            lineData.length ? width / 2 - 4 : width,
+                            height - 98,
+                          ]}
+                        ></Map>
+                      </div>
+                    ))}
+                  </Wrapper>
+                </TabPane>
+                <TabPane tab="Structure" key="3" style={{ overflow: "auto" }}>
+                  <Wrapper width={Math.max(forceData.length * 50, 100) + "%"}>
+                    {forceData
+                      .filter((d) => {
+                        const set = new Set(selectedGraphs);
+                        return set.has(d.key);
+                      })
+                      .map((d) => (
+                        <div
+                          style={{
+                            width: lineData.length ? width / 2 - 4 : width,
+                            height: height - 98,
+                          }}
+                        >
+                          <ForceGraph
+                            d={d}
+                            timeRange={selectedTimeRange}
+                            edges={selectedFields}
+                            fields={fields}
+                            set={set}
+                            selectedPersonnel={selectedPersonnel}
+                            color={colorScaleForChannels}
+                            highlightPersonnel={highlightPersonnel}
+                            size={[
+                              lineData.length ? width / 2 - 4 : width,
+                              height - 98,
+                            ]}
+                          />
+                        </div>
+                      ))}
+                  </Wrapper>
+                </TabPane>
+              </Tabs>{" "}
+            </>
+          )}
+        </Chart>
       </SubPane>
     </Container>
   );

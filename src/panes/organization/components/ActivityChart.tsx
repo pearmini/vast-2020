@@ -156,14 +156,15 @@ function chart(
   margin: { left: number; right: number; top: number; bottom: number }
 ): void {
   // const width =
-  // predefinedWidth ?? containerElement.getBoundingClientRect().width;
+  //   predefinedWidth ?? containerElement.getBoundingClientRect().width;
   const width = 600;
   const height = 500;
   const container = d3.select(containerElement);
   container.selectAll("svg").remove();
-  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).style('background', '#fff');
   // .attr("width", width)
   // .attr("height", height);
+
   const scaleX = d3
     .scaleUtc()
     .domain(d3.extent(records, (r) => r.time) as [number, number])

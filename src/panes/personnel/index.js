@@ -12,19 +12,7 @@ const Title = styled.h2``;
 
 const SubPane = styled.div`
   margin-bottom: 10px;
-`;
-
-const Rect = styled.div`
-  position: relative;
-  padding-top: calc(90%);
-`;
-
-const Wrapper = styled.div`
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
+  height: calc(${(props) => props.height}% - 20px);
 `;
 
 const Container = styled.div`
@@ -96,75 +84,71 @@ export default connect(({ global }) => ({ ...global }))(function ({
       <Title>Personnel</Title>
       {selectedPersonnel.length ? (
         <>
-          <SubPane>
-            <Tabs defaultActiveKey="1">
-              {barData.map((d) => (
-                <TabPane tab={d.id} key={d.id}>
-                  <Chart>
-                    <BarChart
-                      data={d.data}
-                      color={colorScaleForChannels}
-                      name={d.id}
-                    />
-                  </Chart>
-                </TabPane>
-              ))}
-            </Tabs>
+          <SubPane height={30}>
+            <Chart>
+              {(width, height) => (
+                <Tabs defaultActiveKey="1">
+                  {barData.map((d) => (
+                    <TabPane tab={d.id} key={d.id}>
+                      <BarChart
+                        data={d.data}
+                        color={colorScaleForChannels}
+                        name={d.id}
+                        size={[width, height - 80]}
+                      />
+                    </TabPane>
+                  ))}
+                </Tabs>
+              )}
+            </Chart>
           </SubPane>
-          <SubPane>
-            <Tabs defaultActiveKey="1">
-              <TabPane tab={"Demographics"} key="1">
-                <Rect>
-                  <Wrapper>
+          <SubPane height={70}>
+            <Chart>
+              {(width, height) => (
+                <Tabs defaultActiveKey="1">
+                  <TabPane tab={"Demographics"} key="1">
                     <DcMatrix
                       data={dcData}
                       names={dcLabelData}
                       color={colorScaleForData}
                       highlightPersonnel={highlightPersonnel}
+                      size={[width, height - 80]}
                     />
-                  </Wrapper>
-                </Rect>
-              </TabPane>
-              <TabPane tab={"Co-authorship"} key="2">
-                <Rect>
-                  <Wrapper>
+                  </TabPane>
+                  <TabPane tab={"Co-authorship"} key="2">
                     <DcMatrix
                       data={coData}
                       names={coLabelData}
                       color={colorScaleForData}
                       highlightPersonnel={highlightPersonnel}
+                      size={[width, height - 80]}
                     />
-                  </Wrapper>
-                </Rect>
-              </TabPane>
-              <TabPane tab={"Procurement"} key="3">
-                <Rect>
-                  <Wrapper>
+                  </TabPane>
+                  <TabPane tab={"Procurement"} key="3">
                     <DcMatrix
                       data={proData}
                       names={proLabelData}
                       color={colorScaleForData}
                       highlightPersonnel={highlightPersonnel}
+                      size={[width, height - 80]}
+                      fontSize={8}
                     />
-                  </Wrapper>
-                </Rect>
-              </TabPane>
-              <TabPane tab={"Travel"} key="4">
-                <Rect>
-                  <Wrapper>
+                  </TabPane>
+                  <TabPane tab={"Travel"} key="4">
                     <DcMatrix
                       data={traData}
                       names={traLabelData}
                       color={colorScaleForData}
                       highlightPersonnel={highlightPersonnel}
+                      size={[width, height - 80]}
                       compare={(l, d) =>
                         l.TargetLocation === d[0] || l.SourceLocation === d[0]
                       }
                     />
-                  </Wrapper>
-                </Rect>
-              </TabPane>
-            </Tabs>
+                  </TabPane>
+                </Tabs>
+              )}
+            </Chart>
           </SubPane>
         </>
       ) : (
