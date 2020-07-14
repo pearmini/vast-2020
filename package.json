@@ -22,9 +22,7 @@
     "react-scripts": "3.4.1",
     "react-vega": "^7.3.0",
     "swr": "^0.2.3",
-    "typescript": "^3.9.6",
-    "vega": "^5.13.0",
-    "vega-lite": "^4.13.1"
+    "typescript": "^3.9.6"
   },
   "scripts": {
     "start": "react-scripts start",

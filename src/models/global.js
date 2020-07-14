@@ -7,6 +7,7 @@ import g3 from "../data/g3.csv";
 import g4 from "../data/g4.csv";
 import g5 from "../data/g5.csv";
 import dc from "../data/dc.csv";
+import { map } from "lodash";
 
 const d3 = {
   ...d3All,
@@ -45,11 +46,7 @@ function preprocessByEdge(raw) {
     .flatMap(({ key, data }) =>
       data.map((d) => ({ ...d, key, Time: offset(d.Time), eType: +d.eType }))
     )
-    .filter((d) => d.eType !== 4 && d.eType !== 5) // 去掉 Demographics 和 Co-authorship
-    .map((d) => ({
-      ...d,
-      eType: d.eType === 2 || d.eType === 3 ? 7 : d.eType, // 将 Procurement 设置为一类
-    }));
+    .filter((d) => d.eType !== 4 && d.eType !== 5); // 去掉 Demographics 和 Co-authorship
 
   const timeRange = d3.extent(namevalues, (d) => d.Time);
   const dataByEtype = Array.from(d3.groups(namevalues, (d) => d.eType));
@@ -60,12 +57,12 @@ function preprocessByKey(raw) {
   // 暂时先保留电话和邮件的边
   const dataByKey = raw.map(({ data, key }) => ({
     key,
-    data: data
-      .map((d) => ({ ...d, key, Time: offset(d.Time), eType: +d.eType }))
-      .map((d) => ({
-        ...d,
-        eType: d.eType === 2 || d.eType === 3 ? 7 : d.eType, // 将 Procurement 设置为一类
-      })),
+    data: data.map((d) => ({
+      ...d,
+      key,
+      Time: offset(d.Time),
+      eType: +d.eType,
+    })),
   }));
   return {
     dataByKey,
@@ -73,14 +70,9 @@ function preprocessByKey(raw) {
 }
 
 function preprocessBySource(raw) {
-  const flatData = raw
-    .flatMap(({ key, data }) =>
-      data.map((d) => ({ ...d, key, Time: offset(d.Time), eType: +d.eType }))
-    )
-    .map((d) => ({
-      ...d,
-      eType: d.eType === 2 || d.eType === 3 ? 7 : d.eType, // 将 Procurement 设置为一类
-    }));
+  const flatData = raw.flatMap(({ key, data }) =>
+    data.map((d) => ({ ...d, key, Time: offset(d.Time), eType: +d.eType }))
+  );
   const dataBySource = d3.group(flatData, (d) => d.Source);
   return {
     dataBySource,
@@ -92,7 +84,60 @@ function getCo(raw) {
     .flatMap(({ key, data }) =>
       data.map((d) => ({ ...d, key, Time: offset(d.Time), eType: +d.eType }))
     )
-    .filter((d) => d.eType === 6);
+    .filter((d) => d.eType === 4);
+}
+
+function getMap(raw) {
+  // 找到有 SourceLocation 的数据
+  const edges = raw
+    .flatMap(({ key, data }) =>
+      data.map((d) => ({ ...d, key, Time: offset(d.Time), eType: +d.eType }))
+    )
+    .filter((d) => d.eType === 6 || d.eType === 0 || d.eType === 1)
+    .filter((d) => d.SourceLocation !== "");
+
+  const locationByCountry = d3.map();
+  for (let e of edges) {
+    const source = [e.SourceLocation, e.SourceLatitude, e.SourceLongitude];
+    const target = [e.TargetLocation, e.TargetLatitude, e.TargetLongitude];
+    const locations = [source, target].filter((d) => d[0] !== "");
+    locations.forEach((d) => {
+      const locations = locationByCountry.get(d[0]);
+      const newLocations = d[1] ? [[d[1], d[2]]] : [];
+      if (locations) {
+        locationByCountry.set(d[0], [...locations, ...newLocations]);
+      } else {
+        locationByCountry.set(d[0], newLocations);
+      }
+    });
+  }
+
+  return locationByCountry.entries().map(({ key, value }) => {
+    const minX = d3.min(value, (d) => +d[0]),
+      maxX = d3.max(value, (d) => +d[0]);
+    const minY = d3.min(value, (d) => +d[1]),
+      maxY = d3.max(value, (d) => +d[1]);
+    return {
+      key,
+      minX,
+      maxX,
+      minY,
+      maxY,
+      width: maxX - minX,
+      height: maxY - minY,
+      x: (minX + maxX) / 2,
+      y: (minY + maxY) / 2,
+      r: Math.max(maxX - minY, maxY - minY) / 2,
+    };
+  });
+}
+
+function getPro(raw) {
+  return raw
+    .flatMap(({ key, data }) =>
+      data.map((d) => ({ ...d, key, Time: offset(d.Time), eType: +d.eType }))
+    )
+    .filter((d) => d.eType === 2 || d.eType === 3);
 }
 
 const graphs = ["template", "g1", "g2", "g3", "g4", "g5"];
@@ -106,8 +151,12 @@ const fields = [
     value: 1,
   },
   {
-    name: "Transaction",
-    value: 7,
+    name: "Sell",
+    value: 2,
+  },
+  {
+    name: "Buy",
+    value: 3,
   },
   {
     name: "Travel",
@@ -140,6 +189,9 @@ export default {
     selectedPeople: [],
     dcByNodeID: d3.map(),
     highlightPersonnel: -1,
+    mapData: [],
+    coData: [],
+    proData: [],
   },
   reducers: {
     save(state, action) {
@@ -157,16 +209,36 @@ export default {
     *getData(_, { call, put }) {
       const graphList = yield call(readGraphCSV);
       const dc = yield call(readDcCSV);
+
       const { dataByEtype, timeRange } = preprocessByEdge(graphList);
       const { dataByKey } = preprocessByKey(graphList);
       const { dataBySource } = preprocessBySource(graphList);
+
       const coData = getCo(graphList);
-      console.log(coData);
-      const dcByNodeID = d3.rollup(
-        dc,
-        ([d]) => d.Category,
-        (d) => d.NodeID
+      const mapData = getMap(graphList);
+      const proData = getPro(graphList);
+
+      const coLabelData = Array.from(
+        new Set(coData.map((d) => d.Target))
+      ).map((d) => [d, d]);
+
+      const dcLabelData = Array.from(
+        d3.rollup(
+          dc,
+          ([d]) => d.Category,
+          (d) => d.NodeID
+        )
       );
+
+      const proLabelData = Array.from(
+        new Set(proData.map((d) => `${d.Target}+${d.Weight}`))
+      ).map((d) => {
+        const [key, weight] = d.split("+");
+        return [key, key, weight];
+      });
+
+      const traLabelData = mapData.map((d) => [d.key, d.key]);
+
       yield put({
         type: "save",
         payload: {
@@ -175,7 +247,11 @@ export default {
           selectedTimeRange: timeRange,
           dataByKey,
           dataBySource,
-          dcByNodeID,
+          dcLabelData,
+          coLabelData,
+          proLabelData,
+          traLabelData,
+          mapData,
         },
       });
     },

@@ -175,6 +175,7 @@ function chart(
     .range([height - margin.bottom, margin.top])
     .padding(1);
   const scaleColor = d3.scaleOrdinal(d3.schemeCategory10);
+
   svg
     .append("g")
     .attr("transform", `translate(${margin.left}, 0)`)

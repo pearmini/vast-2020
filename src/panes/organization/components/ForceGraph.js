@@ -141,7 +141,7 @@ export default function ({
           <title>{d.id}</title>
         </circle>
       ))}
-      <g transform={`translate(${width - margin.right}, ${margin.top})`}>
+      {/* <g transform={`translate(${width - margin.right}, ${margin.top})`}>
         {edges.map((key, index) => (
           <g key={key} transform={`translate(0, ${index * 20})`}>
             <rect
@@ -154,7 +154,7 @@ export default function ({
             <text>{fields.find((d) => d.value === key).name}</text>
           </g>
         ))}
-      </g>
+      </g> */}
     </svg>
   );
 }

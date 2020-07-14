@@ -14,13 +14,12 @@ const Svg = styled.svg`
   height: 100%;
 `;
 
-export default function ({ nameByNodeID, data, highlightPersonnel, color }) {
+export default function ({ names, data, highlightPersonnel, color, compare }) {
   const width = 400,
     height = 400,
     margin = { top: 20, right: 20, bottom: 0, left: 30 },
     innerWidth = width - margin.left - margin.right;
 
-  const names = Array.from(nameByNodeID);
   const translateX = 100;
   const cellWidth = data.length
     ? Math.min(30, (innerWidth - translateX) / data.length)
@@ -37,13 +36,18 @@ export default function ({ nameByNodeID, data, highlightPersonnel, color }) {
     if (highlightPersonnel === -1) {
       return d.has ? color(d.graph) : "#eee";
     } else {
-      return +highlightPersonnel === +key && d.has ? "red" : "#eee";
+      if (+highlightPersonnel === +key) {
+        return d.has ? "red" : "rgba(255, 0, 0, 0.1)";
+      } else {
+        return d.has ? "red" : "#eee";
+      }
     }
   };
 
   const wrapper = (list) =>
     names.map((d) => {
-      const item = list.find((l) => l.Target === d[0]);
+      const c = compare ? compare : (l, d) => l.Target === d[0];
+      const item = list.find((l) => c(l, d));
       return {
         key: d[1],
         has: item !== undefined,
