@@ -2,10 +2,13 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { connect } from "dva";
 import { Slider, Select, DatePicker } from "antd";
+
+import Chart from "../../components/Chart";
+
 import LineChart from "./components/LineChart";
 import ForceGraph from "./components/ForceGraph";
-import Chart from "../../components/Chart";
 import ActivityChart from "./components/ActivityChart";
+import Map from "./components/Map";
 import moment from "moment";
 
 const { Option } = Select;
@@ -104,9 +107,10 @@ export default connect(({ global }) => ({ ...global }), {
   selectedPersonnel,
   colorScaleForData,
   colorScaleForChannels,
+  mapData,
   highlightPersonnel,
 }) {
-  const [activityType, setActivityType] = useState("Overview");
+  const [activityType, setActivityType] = useState("Scatter");
   const [selectedName, setSelectedName] = useState("template");
   const validTimeOffset = timeOffSet.filter(([name]) => {
     const set = new Set(selectedGraphs);
@@ -132,6 +136,25 @@ export default connect(({ global }) => ({ ...global }), {
           return { ...d, Time: d.Time + offsetDay * 24 * 60 * 60 };
         });
       return { ...d, list: offsetList || [] };
+    });
+
+  const connectionData = dataByKey
+    .map(({ key, data }) => {
+      const [, offsetDay] = timeOffSet.find(([name]) => name === key);
+      const fieldSet = new Set(selectedFields);
+      return {
+        key,
+        data: data
+          .map((d) => ({
+            ...d,
+            Time: d.Time + offsetDay * 24 * 60 * 60,
+          }))
+          .filter((d) => fieldSet.has(d.eType)),
+      };
+    })
+    .filter((d) => {
+      const set = new Set(selectedGraphs);
+      return set.has(d.key);
     });
 
   const forceData = dataByKey
@@ -200,6 +223,31 @@ export default connect(({ global }) => ({ ...global }), {
           </Card>
         )}
       </Control>
+      <SubPane width={40}>
+        <SubTitle>Overview</SubTitle>
+        <MyRow>
+          <Wrapper width={Math.max(lineData.length * 50, 100) + "%"}>
+            {lineData.map((d) => (
+              <Chart
+                key={d.name}
+                width={
+                  lineData.length
+                    ? `calc(${(100 / lineData.length) | 0}% - 4px)`
+                    : "100%"
+                }
+                height="100%"
+              >
+                <LineChart
+                  data={d}
+                  timeRange={selectedTimeRange}
+                  selectedGraphs={selectedGraphs}
+                  color={colorScaleForData}
+                />
+              </Chart>
+            ))}
+          </Wrapper>
+        </MyRow>
+      </SubPane>
       <SubPane width={60}>
         <Row>
           <SubTitle>Activity</SubTitle>
@@ -208,42 +256,26 @@ export default connect(({ global }) => ({ ...global }), {
             value={activityType}
             onChange={setActivityType}
           >
-            <Option value="Overview">Overview</Option>
-            <Option value="Detail">Detail</Option>
+            <Option value="Scatter">Scatter</Option>
+            <Option value="ForceMap">ForceMap</Option>
+            <Option value="Map">Map</Option>
           </Select>
         </Row>
         <MyRow>
           <Wrapper
             width={
               Math.max(
-                activityType === "Overview"
-                  ? lineData.length * 50
-                  : selectedGraphs.length * 50,
+                activityType === "Scatter"
+                  ? selectedGraphs.length * 50
+                  : activityType === "ForceMap"
+                  ? selectedGraphs.length * 50
+                  : connectionData.length * 50,
                 100
               ) + "%"
             }
           >
-            {activityType === "Overview"
-              ? lineData.map((d) => (
-                  <Chart
-                    key={d.name}
-                    width={
-                      lineData.length
-                        ? `calc(${(100 / lineData.length) | 0}% - 4px)`
-                        : "100%"
-                    }
-                    height="100%"
-                  >
-                    <LineChart
-                      data={d}
-                      timeRange={selectedTimeRange}
-                      selectedGraphs={selectedGraphs}
-                      selectedFeilds={selectedFields}
-                      color={colorScaleForData}
-                    />
-                  </Chart>
-                ))
-              : selectedGraphs.map((name) => (
+            {activityType === "Scatter"
+              ? selectedGraphs.map((name) => (
                   <Chart
                     key={name}
                     width={
@@ -262,40 +294,52 @@ export default connect(({ global }) => ({ ...global }), {
                       highlightPersonnel={highlightPersonnel}
                     />
                   </Chart>
+                ))
+              : activityType === "ForceMap"
+              ? forceData
+                  .filter((d) => {
+                    const set = new Set(selectedGraphs);
+                    return set.has(d.key);
+                  })
+                  .map((d) => (
+                    <Chart
+                      key={d.key}
+                      width={
+                        lineData.length
+                          ? `calc(${(100 / forceData.length) | 0}% - 4px)`
+                          : "100%"
+                      }
+                    >
+                      <ForceGraph
+                        d={d}
+                        timeRange={selectedTimeRange}
+                        edges={selectedFields}
+                        fields={fields}
+                        set={set}
+                        selectedPersonnel={selectedPersonnel}
+                        color={colorScaleForChannels}
+                        highlightPersonnel={highlightPersonnel}
+                      />
+                    </Chart>
+                  ))
+              : connectionData.map((d) => (
+                  <Chart
+                    key={d.name}
+                    width={
+                      connectionData.length
+                        ? `calc(${(100 / connectionData.length) | 0}% - 4px)`
+                        : "100%"
+                    }
+                    height="100%"
+                  >
+                    <Map
+                      location={mapData}
+                      connectionData={d}
+                      color={colorScaleForChannels}
+                      fields={fields}
+                    ></Map>
+                  </Chart>
                 ))}
-          </Wrapper>
-        </MyRow>
-      </SubPane>
-      <SubPane width={40}>
-        <SubTitle>Structure</SubTitle>
-        <MyRow>
-          <Wrapper width={Math.max(forceData.length * 50, 100) + "%"}>
-            {forceData
-              .filter((d) => {
-                const set = new Set(selectedGraphs);
-                return set.has(d.key);
-              })
-              .map((d) => (
-                <Chart
-                  key={d.key}
-                  width={
-                    lineData.length
-                      ? `calc(${(100 / forceData.length) | 0}% - 4px)`
-                      : "100%"
-                  }
-                >
-                  <ForceGraph
-                    d={d}
-                    timeRange={selectedTimeRange}
-                    edges={selectedFields}
-                    fields={fields}
-                    set={set}
-                    selectedPersonnel={selectedPersonnel}
-                    color={colorScaleForChannels}
-                    highlightPersonnel={highlightPersonnel}
-                  />
-                </Chart>
-              ))}
           </Wrapper>
         </MyRow>
       </SubPane>
