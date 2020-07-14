@@ -101,6 +101,8 @@ function preprocess(edges: OriginalEdge[]): ActivityRecord[] {
 
 export type FrequencyHeatmapProps = {
   name: string;
+  width: number;
+  height: number;
   margin?: { left: number; right: number; top: number; bottom: number };
 };
 
@@ -112,6 +114,8 @@ const HIGHLIGHT_RADIUS = 5;
 const FrequencyHeatmap: React.FC<FrequencyHeatmapProps> = ({
   name,
   margin = { left: 60, right: 30, top: 20, bottom: 30 },
+  width,
+  height,
 }) => {
   const { data } = useCSV<OriginalEdge[]>(nameUrlMap[name]);
   const records = useMemo(
@@ -127,8 +131,8 @@ const FrequencyHeatmap: React.FC<FrequencyHeatmapProps> = ({
     if (containerRef.current === null || records === undefined) {
       return;
     }
-    chart(containerRef.current, records, containerRect?.width, margin);
-  }, [records, margin, containerRect]);
+    chart(containerRef.current, records, width, height, name, margin);
+  }, [records, margin, containerRect, width, height, name]);
 
   return (
     <Container ref={containerRef}>
@@ -139,6 +143,8 @@ const FrequencyHeatmap: React.FC<FrequencyHeatmapProps> = ({
 
 FrequencyHeatmap.propTypes = {
   name: PropTypes.string.isRequired,
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
   margin: PropTypes.shape({
     left: PropTypes.number.isRequired,
     right: PropTypes.number.isRequired,
@@ -152,29 +158,41 @@ export default FrequencyHeatmap;
 function chart(
   containerElement: HTMLDivElement,
   records: ActivityRecord[],
-  predefinedWidth: number | undefined,
+  width: number,
+  height: number,
+  name: string,
   margin: { left: number; right: number; top: number; bottom: number }
 ): void {
   // const width =
   //   predefinedWidth ?? containerElement.getBoundingClientRect().width;
-  const width = 600;
-  const height = 500;
+  // const width = 600;
+  // const height = 500;
   const container = d3.select(containerElement);
   container.selectAll("svg").remove();
-  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).style('background', '#fff');
-  // .attr("width", width)
-  // .attr("height", height);
+  const svg = container
+    .append("svg")
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .style("background", "#fff")
+    .attr("width", width)
+    .attr("height", height);
+
+  svg
+    .append("text")
+    .attr("transform", `translate(${width / 2}, ${margin.top})`)
+    .text(name);
 
   const scaleX = d3
     .scaleUtc()
     .domain(d3.extent(records, (r) => r.time) as [number, number])
     .range([margin.left, width - margin.right])
     .nice();
+
   const scaleY = d3
     .scalePoint()
     .domain(_.uniq(records.map((x) => (x.person as unknown) as string)))
     .range([height - margin.bottom, margin.top])
     .padding(1);
+
   const scaleColor = d3.scaleOrdinal(d3.schemeCategory10);
 
   svg
