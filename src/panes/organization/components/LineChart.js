@@ -7,7 +7,7 @@ const d3 = {
   ...d3Array,
 };
 
-export default function ({ data, timeRange, selectedGraphs, selectedFeilds }) {
+export default function ({ data, timeRange, selectedGraphs, selectedFeilds, color}) {
   const width = 600,
     height = 400,
     margin = { top: 10, right: 60, bottom: 30, left: 30 },
@@ -30,11 +30,6 @@ export default function ({ data, timeRange, selectedGraphs, selectedFeilds }) {
     .range([0, innerWidth]);
 
   const y = d3.scaleLinear().domain(countRange).nice().range([innerHeight, 0]);
-
-  const color = d3
-    .scaleOrdinal()
-    .domain(selectedGraphs)
-    .range(d3.schemeCategory10);
 
   const line = d3
     .line()

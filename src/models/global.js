@@ -87,6 +87,34 @@ function preprocessBySource(raw) {
   };
 }
 
+function getCo(raw) {
+  return raw
+    .flatMap(({ key, data }) =>
+      data.map((d) => ({ ...d, key, Time: offset(d.Time), eType: +d.eType }))
+    )
+    .filter((d) => d.eType === 6);
+}
+
+const graphs = ["template", "g1", "g2", "g3", "g4", "g5"];
+const fields = [
+  {
+    name: "Phone",
+    value: 0,
+  },
+  {
+    name: "Email",
+    value: 1,
+  },
+  {
+    name: "Transaction",
+    value: 7,
+  },
+  {
+    name: "Travel",
+    value: 6,
+  },
+];
+
 export default {
   namespace: "global",
   state: {
@@ -95,31 +123,23 @@ export default {
     selectedTimeRange: [0, 0],
     dataByKey: [],
     dataBySource: d3.map(),
-    graphs: ["template", "g1", "g2", "g3", "g4", "g5"],
+    graphs,
     selectedGraphs: ["template", "g1"],
-    timeOffSet: ["template", "g1", "g2", "g3", "g4", "g5"].map((d) => [d, 0]),
+    timeOffSet: graphs.map((d) => [d, 0]),
     selectedFields: [0, 1],
     selectedPersonnel: [],
-    fields: [
-      {
-        name: "Phone",
-        value: 0,
-      },
-      {
-        name: "Email",
-        value: 1,
-      },
-      {
-        name: "Transaction",
-        value: 7,
-      },
-      {
-        name: "Travel",
-        value: 6,
-      },
-    ],
+    colorScaleForData: d3
+      .scaleOrdinal()
+      .domain(graphs)
+      .range(d3.schemeCategory10),
+    colorScaleForChannels: d3
+      .scaleOrdinal()
+      .domain(fields.map((d) => d.name))
+      .range(d3.schemeAccent),
+    fields,
     selectedPeople: [],
     dcByNodeID: d3.map(),
+    highlightPersonnel: -1,
   },
   reducers: {
     save(state, action) {
@@ -140,6 +160,8 @@ export default {
       const { dataByEtype, timeRange } = preprocessByEdge(graphList);
       const { dataByKey } = preprocessByKey(graphList);
       const { dataBySource } = preprocessBySource(graphList);
+      const coData = getCo(graphList);
+      console.log(coData);
       const dcByNodeID = d3.rollup(
         dc,
         ([d]) => d.Category,

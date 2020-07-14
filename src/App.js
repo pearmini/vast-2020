@@ -4,7 +4,6 @@ import styled from "styled-components";
 import SiderPane from "./panes/sider";
 import OrganizationPane from "./panes/organization";
 import PersonnelPane from "./panes/personnel";
-import ActivityPane from "./panes/activity";
 
 const Container = styled.div`
   height: 100%;
@@ -40,14 +39,14 @@ const Sider = styled.div`
 `;
 
 const Left = styled.div`
-  width: calc(60% - 4px);
+  width: calc(70% - 4px);
   height: 100%;
   background: rgba(255, 255, 255, 0.6);
   padding: 8px;
 `;
 
 const Right = styled.div`
-  width: calc(40% - 4px);
+  width: calc(30% - 4px);
   height: 100%;
   background: rgba(255, 255, 255, 0.6);
   padding: 8px;
@@ -75,11 +74,10 @@ function App() {
           <SiderPane setWidth={setSiderWidth} width={siderWidth} />
         </Sider>
         <Main width={siderWidth} hide={siderWidth === 0}>
-          <Left width={60}>
+          <Left>
             <OrganizationPane />
           </Left>
-          <Right width={40}>
-            {/* <ActivityPane /> */}
+          <Right>
             <PersonnelPane />
           </Right>
         </Main>

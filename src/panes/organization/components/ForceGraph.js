@@ -14,9 +14,14 @@ export default function ({
   fields,
   set,
   selectedPersonnel,
+  color,
+  highlightPersonnel,
 }) {
-  const width = 600,
-    height = 400,
+  const HIGHLIGHT_COLOR = "red";
+  const NORMAL_COLOR = "black";
+  const DISABLE_COLOR = "grey";
+  const width = 600 * 0.9,
+    height = 400 * 0.9,
     margin = { top: 10, right: 60, bottom: 30, left: 30 };
   const { key, data } = d;
   const [start, end] = timeRange;
@@ -25,6 +30,16 @@ export default function ({
     (d) => d.Time >= start && d.Time < end && edgeSet.has(d.eType)
   );
   const { links, nodes } = getGraphData(validData);
+
+  const circleColorScale = (id) => {
+    if (highlightPersonnel !== -1) {
+      return +highlightPersonnel === id ? HIGHLIGHT_COLOR : DISABLE_COLOR;
+    } else {
+      const item = selectedPersonnel.find((d) => +d === id);
+      return item === undefined ? NORMAL_COLOR : HIGHLIGHT_COLOR;
+    }
+  };
+
   const simulation = d3
     .forceSimulation(nodes)
     .force(
@@ -81,14 +96,16 @@ export default function ({
     return { nodes, links: combine(links) };
   }
 
-  const color = d3.scaleOrdinal().domain(edges).range(d3.schemeCategory10);
-
   return (
     <svg
       viewBox={[0, 0, width, height]}
       style={{ width: "100%", height: "100%" }}
     >
-      <text transform={`translate(${width / 2}, 0)`} textAnchor="middle">
+      <text
+        transform={`translate(${width / 2}, 20)`}
+        textAnchor="middle"
+        fontSize="20"
+      >
         {key}
       </text>
       {links.map((d) => (
@@ -99,7 +116,7 @@ export default function ({
           x2={d.target.x}
           y2={d.target.y}
           strokeWidth={Math.sqrt(d.value)}
-          stroke={color(d.eType)}
+          stroke={color(fields.find((f) => f.value === d.eType).name)}
         />
       ))}
       {nodes.map((d) => (
@@ -119,6 +136,7 @@ export default function ({
             }
             set("selectedPersonnel", newSelectedPersonnel);
           }}
+          fill={circleColorScale(d.id)}
         >
           <title>{d.id}</title>
         </circle>
@@ -127,7 +145,7 @@ export default function ({
         {edges.map((key, index) => (
           <g key={key} transform={`translate(0, ${index * 20})`}>
             <rect
-              fill={color(key)}
+              fill={color(fields.find((d) => d.value === key).name)}
               width={10}
               height={10}
               x={-15}

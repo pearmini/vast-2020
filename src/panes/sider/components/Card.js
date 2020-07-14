@@ -44,6 +44,7 @@ const DataItem = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  cursor: ${(props) => props.pointer || "default"};
 `;
 
 const ExtraItem = styled.div`
@@ -54,6 +55,7 @@ const ExtraItem = styled.div`
   &:hover {
     background: #e2e9f3;
   }
+  cursor: ${(props) => props.pointer || "default"};
 `;
 
 const Icon = styled.span`
@@ -62,6 +64,19 @@ const Icon = styled.span`
 
 const PopoverContainer = styled.div`
   width: 100px;
+`;
+
+const Legend = styled.div`
+  background: ${(props) => props.color};
+  height: 10px;
+  width: 10px;
+  margin-right: 4px;
+`;
+
+const Right = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 export default function ({
@@ -73,6 +88,9 @@ export default function ({
   title,
   type,
   value = (d) => d,
+  colorScale = () => "rgba(237, 237, 237, 0)",
+  onMouseOver,
+  onMouseLeave,
 }) {
   const popoverContent = (
     <PopoverContainer>
@@ -87,7 +105,7 @@ export default function ({
   );
 
   return (
-    <Container>
+    <Container onMouseLeave={() => onMouseLeave && onMouseLeave()}>
       <Header>
         {title}
         {type !== "combine" && (
@@ -107,24 +125,38 @@ export default function ({
       </Header>
       <div>
         {list.map((d, index) => (
-          <DataItem key={value(d)}>
+          <DataItem
+            key={value(d)}
+            onMouseOver={() => onMouseOver && onMouseOver(d)}
+            pointer={onMouseOver ? "pointer" : "default"}
+          >
             <span>{value(d)}</span>
-            <Icon>
-              {type === "combine" ? (
-                <EyeFilled onClick={() => onRemove(index)} />
-              ) : (
-                <DeleteFilled onClick={() => onRemove(index)} />
-              )}
-            </Icon>
+            <Right>
+              <Legend color={colorScale(value(d))} />
+              <Icon>
+                {type === "combine" ? (
+                  <EyeFilled onClick={() => onRemove(index)} />
+                ) : (
+                  <DeleteFilled onClick={() => onRemove(index)} />
+                )}
+              </Icon>
+            </Right>
           </DataItem>
         ))}
         {type === "combine" &&
           extraList.map((d, index) => (
-            <DataItem key={value(d)}>
+            <DataItem
+              key={value(d)}
+              onMouseOver={() => onMouseOver && onMouseOver(d)}
+              pointer={onMouseOver ? "pointer" : "default"}
+            >
               <span>{value(d)}</span>
-              <Icon>
-                <EyeInvisibleFilled onClick={() => onAdd(index)} />
-              </Icon>
+              <Right>
+                <Legend color={colorScale(value(d))} />
+                <Icon>
+                  <EyeInvisibleFilled onClick={() => onAdd(index)} />
+                </Icon>
+              </Right>
             </DataItem>
           ))}
       </div>

@@ -38,6 +38,9 @@ export default connect(({ global }) => ({ ...global }), {
   selectedPersonnel,
   setWidth,
   width,
+  colorScaleForData,
+  colorScaleForChannels,
+  highlightPersonnel,
 }) {
   const extraGraph = graphs.filter(
     (d) => selectedGraphs.find((s) => s === d) === undefined
@@ -74,6 +77,7 @@ export default connect(({ global }) => ({ ...global }), {
           list={selectedGraphs}
           extraList={extraGraph}
           onUpload={() => {}}
+          colorScale={colorScaleForData}
         />
         <Card
           title="Channels"
@@ -93,15 +97,29 @@ export default connect(({ global }) => ({ ...global }), {
           extraList={extraFields}
           value={(d) => d.name}
           type="combine"
+          colorScale={colorScaleForChannels}
         />
         {selectedPersonnel.length > 0 && (
           <Card
             title="Personnel"
             list={selectedPersonnel}
+            onMouseOver={(d) => {
+              set("highlightPersonnel", d);
+            }}
+            onMouseLeave={() => {
+              set("highlightPersonnel", -1);
+            }}
             onRemove={(index) => {
               const newSelectedPersonnel = [...selectedPersonnel];
               newSelectedPersonnel.splice(index, 1);
               set("selectedPersonnel", newSelectedPersonnel);
+            }}
+            colorScale={(id) => {
+              if (highlightPersonnel === id) {
+                return "red";
+              } else {
+                return "rgba(0, 0, 0, 0)";
+              }
             }}
           />
         )}

@@ -14,14 +14,14 @@ const Svg = styled.svg`
   height: 100%;
 `;
 
-export default function ({ nameByNodeID, data, graphs }) {
-  const width = 600,
+export default function ({ nameByNodeID, data, highlightPersonnel, color }) {
+  const width = 400,
     height = 400,
-    margin = { top: 20, right: 60, bottom: 0, left: 30 },
+    margin = { top: 20, right: 20, bottom: 0, left: 30 },
     innerWidth = width - margin.left - margin.right;
 
   const names = Array.from(nameByNodeID);
-  const translateX = 250;
+  const translateX = 100;
   const cellWidth = data.length
     ? Math.min(30, (innerWidth - translateX) / data.length)
     : 30;
@@ -30,8 +30,17 @@ export default function ({ nameByNodeID, data, graphs }) {
     .scaleBand()
     .domain(names.map((d) => d[1]))
     .range([margin.top, height - margin.bottom]);
+
   const x = (index) => cellWidth * index;
-  const color = d3.scaleOrdinal().domain(graphs).range(d3.schemeCategory10);
+
+  const rectColor = (d, key) => {
+    if (highlightPersonnel === -1) {
+      return d.has ? color(d.graph) : "#eee";
+    } else {
+      return +highlightPersonnel === +key && d.has ? "red" : "#eee";
+    }
+  };
+
   const wrapper = (list) =>
     names.map((d) => {
       const item = list.find((l) => l.Target === d[0]);
@@ -42,12 +51,15 @@ export default function ({ nameByNodeID, data, graphs }) {
       };
     });
 
+  const text = (d) => (d.length > 10 ? d.slice(0, 10) + "..." : d);
+
   return (
     <Chart>
       <Svg viewBox={[0, 0, width, height]}>
         {names.map(([key, name]) => (
           <text key={name} y={y(name)} dy="1em" fontSize={11}>
-            {name}
+            {text(name)}
+            <title>{name}</title>
           </text>
         ))}
         <g transform={`translate(${translateX}, 0)`}>
@@ -69,7 +81,7 @@ export default function ({ nameByNodeID, data, graphs }) {
                   y={y(d.key)}
                   height={y.bandwidth() - 2}
                   width={cellWidth - 2}
-                  fill={d.has ? color(d.graph) : "#eee"}
+                  fill={rectColor(d, key)}
                 ></rect>
               ))}
             </g>

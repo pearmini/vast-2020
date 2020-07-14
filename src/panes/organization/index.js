@@ -5,6 +5,7 @@ import { Slider, Select, DatePicker } from "antd";
 import LineChart from "./components/LineChart";
 import ForceGraph from "./components/ForceGraph";
 import Chart from "../../components/Chart";
+import ActivityChart from "./components/ActivityChart";
 import moment from "moment";
 
 const { Option } = Select;
@@ -24,7 +25,7 @@ const SubTitle = styled.h3``;
 const SubPane = styled.div`
   width: 100%;
   margin-top: 10px;
-  height: calc(50% - 55px);
+  height: calc(${(props) => props.width || 50}% - 55px);
   display: flex;
   flex-direction: column;
 `;
@@ -56,7 +57,7 @@ const OffsetSlider = styled(Slider)`
 `;
 
 const StyledSelect = styled(Select)`
-  width: 100px;
+  width: 150px;
 `;
 
 const MyRow = styled.div`
@@ -70,6 +71,11 @@ const Wrapper = styled.div`
   width: ${(props) => props.width || "100%"};
   justify-content: space-between;
   height: 100%;
+`;
+
+const Row = styled.div`
+  display: flex;
+  margin-bottom: 5px;
 `;
 
 export default connect(({ global }) => ({ ...global }), {
@@ -96,7 +102,11 @@ export default connect(({ global }) => ({ ...global }), {
   dataByEtype,
   dataByKey,
   selectedPersonnel,
+  colorScaleForData,
+  colorScaleForChannels,
+  highlightPersonnel,
 }) {
+  const [activityType, setActivityType] = useState("Overview");
   const [selectedName, setSelectedName] = useState("template");
   const validTimeOffset = timeOffSet.filter(([name]) => {
     const set = new Set(selectedGraphs);
@@ -166,7 +176,7 @@ export default connect(({ global }) => ({ ...global }), {
               value={selectedTimeOffset[0]}
               onChange={setSelectedName}
             >
-              {validTimeOffset.map(([name], index) => (
+              {validTimeOffset.map(([name]) => (
                 <Option key={name} value={name}>
                   {name}
                 </Option>
@@ -190,32 +200,73 @@ export default connect(({ global }) => ({ ...global }), {
           </Card>
         )}
       </Control>
-      <SubPane>
-        <SubTitle>Activity</SubTitle>
+      <SubPane width={60}>
+        <Row>
+          <SubTitle>Activity</SubTitle>
+          <Select
+            style={{ width: 150, marginLeft: 10 }}
+            value={activityType}
+            onChange={setActivityType}
+          >
+            <Option value="Overview">Overview</Option>
+            <Option value="Detail">Detail</Option>
+          </Select>
+        </Row>
         <MyRow>
-          <Wrapper width={Math.max(lineData.length * 50, 100) + "%"}>
-            {lineData.map((d) => (
-              <Chart
-                key={d.name}
-                width={
-                  lineData.length
-                    ? `calc(${(100 / lineData.length) | 0}% - 4px)`
-                    : "100%"
-                }
-                height="100%"
-              >
-                <LineChart
-                  data={d}
-                  timeRange={selectedTimeRange}
-                  selectedGraphs={selectedGraphs}
-                  selectedFeilds={selectedFields}
-                />
-              </Chart>
-            ))}
+          <Wrapper
+            width={
+              Math.max(
+                activityType === "Overview"
+                  ? lineData.length * 50
+                  : selectedGraphs.length * 50,
+                100
+              ) + "%"
+            }
+          >
+            {activityType === "Overview"
+              ? lineData.map((d) => (
+                  <Chart
+                    key={d.name}
+                    width={
+                      lineData.length
+                        ? `calc(${(100 / lineData.length) | 0}% - 4px)`
+                        : "100%"
+                    }
+                    height="100%"
+                  >
+                    <LineChart
+                      data={d}
+                      timeRange={selectedTimeRange}
+                      selectedGraphs={selectedGraphs}
+                      selectedFeilds={selectedFields}
+                      color={colorScaleForData}
+                    />
+                  </Chart>
+                ))
+              : selectedGraphs.map((name) => (
+                  <Chart
+                    key={name}
+                    width={
+                      selectedGraphs.length
+                        ? `calc(${(100 / selectedGraphs.length) | 0}% - 4px)`
+                        : "100%"
+                    }
+                    height="100%"
+                  >
+                    <ActivityChart
+                      key={name}
+                      name={name}
+                      selectedPersonnel={selectedPersonnel}
+                      set={set}
+                      scaleColor={colorScaleForChannels}
+                      highlightPersonnel={highlightPersonnel}
+                    />
+                  </Chart>
+                ))}
           </Wrapper>
         </MyRow>
       </SubPane>
-      <SubPane>
+      <SubPane width={40}>
         <SubTitle>Structure</SubTitle>
         <MyRow>
           <Wrapper width={Math.max(forceData.length * 50, 100) + "%"}>
@@ -240,6 +291,8 @@ export default connect(({ global }) => ({ ...global }), {
                     fields={fields}
                     set={set}
                     selectedPersonnel={selectedPersonnel}
+                    color={colorScaleForChannels}
+                    highlightPersonnel={highlightPersonnel}
                   />
                 </Chart>
               ))}
