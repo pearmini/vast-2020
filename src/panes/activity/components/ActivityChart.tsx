@@ -104,7 +104,7 @@ function preprocess(edges: OriginalEdge[]): ActivityRecord[] {
   return records;
 }
 
-export type FrequencyHeatmapProps = {
+export type ActivityChartProps = {
   name: string;
   margin?: { left: number; right: number; top: number; bottom: number };
 };
@@ -114,7 +114,7 @@ const HIGHLIGHT_OPACITY = 0.8;
 const DEFAULT_RADIUS = 3;
 const HIGHLIGHT_RADIUS = 5;
 
-const FrequencyHeatmap: React.FC<FrequencyHeatmapProps> = ({
+const ActivityChart: React.FC<ActivityChartProps> = ({
   name,
   margin = { left: 60, right: 30, top: 20, bottom: 30 },
 }) => {
@@ -143,7 +143,7 @@ const FrequencyHeatmap: React.FC<FrequencyHeatmapProps> = ({
   );
 };
 
-FrequencyHeatmap.propTypes = {
+ActivityChart.propTypes = {
   name: PropTypes.string.isRequired,
   margin: PropTypes.shape({
     left: PropTypes.number.isRequired,
@@ -153,7 +153,7 @@ FrequencyHeatmap.propTypes = {
   }),
 };
 
-export default FrequencyHeatmap;
+export default ActivityChart;
 
 function chart(
   containerElement: HTMLDivElement,
