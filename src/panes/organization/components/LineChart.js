@@ -7,10 +7,9 @@ const d3 = {
   ...d3Array,
 };
 
-export default function ({ data, timeRange, selectedGraphs, color }) {
-  const width = 600,
-    height = 300,
-    margin = { top: 10, right: 20, bottom: 30, left: 30 },
+export default function ({ data, timeRange, selectedGraphs, color, size }) {
+  const [width, height] = size,
+    margin = { top: 30, right: 20, bottom: 30, left: 40 },
     innerWidth = width - margin.left - margin.right,
     innerHeight = height - margin.top - margin.bottom;
   const { name, list } = data;
@@ -103,9 +102,9 @@ export default function ({ data, timeRange, selectedGraphs, color }) {
   return (
     <svg
       viewBox={[0, 0, width, height]}
-      style={{ width: "100%", height: "100%" }}
+      style={{ width: "100%", height: "100%", background: "#fff" }}
     >
-      <text transform={`translate(${width / 2}, 10)`} textAnchor="middle">
+      <text transform={`translate(${width / 2}, 25)`} textAnchor="middle">
         {name}
       </text>
       <g transform={`translate(${margin.left}, ${margin.top})`}>
@@ -121,20 +120,6 @@ export default function ({ data, timeRange, selectedGraphs, color }) {
       </g>
       <g className={`${name}-x-axis`} />
       <g className={`${name}-y-axis`} />
-      {/* <g transform={`translate(${width - margin.right}, ${margin.top})`}>
-        {selectedGraphs.map((key, index) => (
-          <g key={key} transform={`translate(0, ${index * 20})`}>
-            <rect
-              fill={color(key)}
-              width={10}
-              height={10}
-              x={-15}
-              y={-10}
-            ></rect>
-            <text>{key}</text>
-          </g>
-        ))}
-      </g> */}
     </svg>
   );
 }

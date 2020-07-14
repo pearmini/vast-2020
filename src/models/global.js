@@ -7,7 +7,6 @@ import g3 from "../data/g3.csv";
 import g4 from "../data/g4.csv";
 import g5 from "../data/g5.csv";
 import dc from "../data/dc.csv";
-import { map } from "lodash";
 
 const d3 = {
   ...d3All,
@@ -140,6 +139,50 @@ function getPro(raw) {
     .filter((d) => d.eType === 2 || d.eType === 3);
 }
 
+function preprocess(graphList, dc) {
+  const { dataByEtype, timeRange } = preprocessByEdge(graphList);
+  const { dataByKey } = preprocessByKey(graphList);
+  const { dataBySource } = preprocessBySource(graphList);
+
+  const coData = getCo(graphList);
+  const mapData = getMap(graphList);
+  const proData = getPro(graphList);
+
+  const coLabelData = Array.from(
+    new Set(coData.map((d) => d.Target))
+  ).map((d) => [d, d]);
+
+  const dcLabelData = Array.from(
+    d3.rollup(
+      dc,
+      ([d]) => d.Category,
+      (d) => d.NodeID
+    )
+  );
+
+  const proLabelData = Array.from(
+    new Set(proData.map((d) => `${d.Target}+${d.Weight}`))
+  ).map((d) => {
+    const [key, weight] = d.split("+");
+    return [key, key, weight];
+  });
+
+  const traLabelData = mapData.map((d) => [d.key, d.key]);
+
+  return {
+    dataByEtype,
+    timeRange,
+    selectedTimeRange: timeRange,
+    dataByKey,
+    dataBySource,
+    dcLabelData,
+    coLabelData,
+    proLabelData,
+    traLabelData,
+    mapData,
+  };
+}
+
 const graphs = ["template", "g1", "g2", "g3", "g4", "g5"];
 const fields = [
   {
@@ -194,6 +237,33 @@ export default {
     proData: [],
   },
   reducers: {
+    addGraph(state, action) {
+      const { key } = action.payload;
+      const { graphs, timeOffSet } = state;
+      return {
+        ...state,
+        graphs: [...graphs, key],
+        timeOffSet: [...timeOffSet, [key, 0]],
+        colorScaleForData: d3
+          .scaleOrdinal()
+          .domain(graphs)
+          .range(d3.schemeCategory10),
+      };
+    },
+    addEdge(state, action) {
+      const { key, edge } = action.payload;
+      const { graphList, dc } = state;
+      const newGraphList = [...graphList];
+      const g = graphList.find((d) => d.key === key);
+      const i = graphList.indexOf(g);
+      newGraphList[i].data.push(edge);
+      const payload = preprocess(newGraphList, dc);
+      return {
+        ...state,
+        ...payload,
+        graphList: newGraphList,
+      };
+    },
     save(state, action) {
       return {
         ...state,
@@ -209,49 +279,13 @@ export default {
     *getData(_, { call, put }) {
       const graphList = yield call(readGraphCSV);
       const dc = yield call(readDcCSV);
-
-      const { dataByEtype, timeRange } = preprocessByEdge(graphList);
-      const { dataByKey } = preprocessByKey(graphList);
-      const { dataBySource } = preprocessBySource(graphList);
-
-      const coData = getCo(graphList);
-      const mapData = getMap(graphList);
-      const proData = getPro(graphList);
-
-      const coLabelData = Array.from(
-        new Set(coData.map((d) => d.Target))
-      ).map((d) => [d, d]);
-
-      const dcLabelData = Array.from(
-        d3.rollup(
-          dc,
-          ([d]) => d.Category,
-          (d) => d.NodeID
-        )
-      );
-
-      const proLabelData = Array.from(
-        new Set(proData.map((d) => `${d.Target}+${d.Weight}`))
-      ).map((d) => {
-        const [key, weight] = d.split("+");
-        return [key, key, weight];
-      });
-
-      const traLabelData = mapData.map((d) => [d.key, d.key]);
-
+      const payload = preprocess(graphList, dc);
       yield put({
         type: "save",
         payload: {
-          dataByEtype,
-          timeRange,
-          selectedTimeRange: timeRange,
-          dataByKey,
-          dataBySource,
-          dcLabelData,
-          coLabelData,
-          proLabelData,
-          traLabelData,
-          mapData,
+          ...payload,
+          graphList,
+          dc,
         },
       });
     },

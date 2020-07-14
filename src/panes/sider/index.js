@@ -29,6 +29,10 @@ export default connect(({ global }) => ({ ...global }), {
     type: "global/set",
     payload: { key, value },
   }),
+  addGraph: (key) => ({
+    type: "global/addGraph",
+    payload: { key },
+  }),
 })(function ({
   selectedGraphs,
   graphs,
@@ -41,6 +45,7 @@ export default connect(({ global }) => ({ ...global }), {
   colorScaleForData,
   colorScaleForChannels,
   highlightPersonnel,
+  addGraph,
 }) {
   const extraGraph = graphs.filter(
     (d) => selectedGraphs.find((s) => s === d) === undefined
@@ -76,7 +81,7 @@ export default connect(({ global }) => ({ ...global }), {
           }}
           list={selectedGraphs}
           extraList={extraGraph}
-          onUpload={() => {}}
+          onCreate={addGraph}
           colorScale={colorScaleForData}
         />
         <Card

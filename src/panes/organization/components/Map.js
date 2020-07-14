@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import * as d3All from "d3";
 import * as d3Array from "d3-array";
 import styled from "styled-components";
@@ -14,7 +14,7 @@ const Container = styled.svg`
   height: 100%;
 `;
 
-export default function ({ location, connectionData, color, fields }) {
+export default function ({ location, connectionData, color, fields, size }) {
   const minX = d3.min(location, (d) => d.minX - d.r),
     maxX = d3.max(location, (d) => d.maxX + d.r),
     minY = d3.min(location, (d) => d.minY - d.r),
@@ -22,7 +22,7 @@ export default function ({ location, connectionData, color, fields }) {
 
   const innerWidth = maxX - minX,
     innerHeight = maxY - minY,
-    margin = { top: 10, right: 20, bottom: 30, left: 30 },
+    margin = { top: 50, right: 20, bottom: 40, left: 30 },
     width = innerWidth + margin.left + margin.right || 0,
     height = innerHeight + margin.top + margin.bottom || 0;
 
@@ -94,10 +94,18 @@ export default function ({ location, connectionData, color, fields }) {
     return { nodes: merge(nodes), links: merge(links) };
   }
 
+  useEffect(() => {
+
+  })
+
   return (
     <Container viewBox={[0, 0, width, height]}>
+      <text x={width / 2} y={margin.top - 10} textAnchor="middle">
+        {key}
+      </text>
+      <g className={`${key}-x-axis-graph`} />
+      <g className={`${key}-y-axis-graph`} />
       <g transform={`translate(${margin.left}, ${margin.top})`}>
-        <text>{key}</text>
         {circles.map((d) => (
           <circle
             key={d.key}

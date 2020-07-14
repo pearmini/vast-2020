@@ -8,10 +8,9 @@ const Container = styled.svg`
   height: 100%;
 `;
 
-export default function ({ data, name, color }) {
-  const width = 600 * 0.9,
-    height = 400 * 0.9,
-    margin = { top: 10, right: 20, bottom: 30, left: 30 };
+export default function ({ data, name, color, size }) {
+  const [width, height] = size,
+    margin = { top: 20, right: 20, bottom: 30, left: 40 };
 
   const y = d3
     .scaleLinear()
@@ -27,12 +26,15 @@ export default function ({ data, name, color }) {
 
   useEffect(() => {
     const xAxis = (g) =>
-      g.attr("transform", `translate(${0},${height - margin.bottom})`).call(
-        d3
-          .axisBottom(x)
-          .ticks(width / 90)
-          .tickSizeOuter(0)
-      );
+      g
+        .attr("transform", `translate(${0},${height - margin.bottom})`)
+        .call(
+          d3
+            .axisBottom(x)
+            .ticks(width / 90)
+            .tickSizeOuter(0)
+        )
+        .call((d) => g.selectAll(".tick text").attr("transform", "rotate(10)"));
 
     const yAxis = (g) =>
       g

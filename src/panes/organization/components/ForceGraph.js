@@ -16,13 +16,12 @@ export default function ({
   selectedPersonnel,
   color,
   highlightPersonnel,
+  size,
 }) {
   const HIGHLIGHT_COLOR = "red";
-  const NORMAL_COLOR = "black";
+  const NORMAL_COLOR = "currentColor";
   const DISABLE_COLOR = "grey";
-  const width = 600 * 0.9,
-    height = 400 * 0.9,
-    margin = { top: 10, right: 60, bottom: 30, left: 30 };
+  const [width, height] = size;
   const { key, data } = d;
   const [start, end] = timeRange;
   const edgeSet = new Set(edges);
@@ -99,13 +98,9 @@ export default function ({
   return (
     <svg
       viewBox={[0, 0, width, height]}
-      style={{ width: "100%", height: "100%" }}
+      style={{ width: "100%", height: "100%", background: "#fff" }}
     >
-      <text
-        transform={`translate(${width / 2}, 20)`}
-        textAnchor="middle"
-        fontSize="20"
-      >
+      <text transform={`translate(${width / 2}, 30)`} textAnchor="middle">
         {key}
       </text>
       {links.map((d) => (
@@ -122,7 +117,7 @@ export default function ({
       {nodes.map((d) => (
         <circle
           key={d.id}
-          r={5}
+          r={4}
           cx={d.x}
           cy={d.y}
           cursor="pointer"
@@ -141,20 +136,21 @@ export default function ({
           <title>{d.id}</title>
         </circle>
       ))}
-      {/* <g transform={`translate(${width - margin.right}, ${margin.top})`}>
-        {edges.map((key, index) => (
-          <g key={key} transform={`translate(0, ${index * 20})`}>
-            <rect
-              fill={color(fields.find((d) => d.value === key).name)}
-              width={10}
-              height={10}
-              x={-15}
-              y={-10}
-            ></rect>
-            <text>{fields.find((d) => d.value === key).name}</text>
-          </g>
-        ))}
-      </g> */}
+      {nodes.map((d) => (
+        <text
+          key={d.id}
+          x={d.x}
+          y={d.y}
+          dx={3}
+          dy={-3}
+          fontSize="10"
+          fill="black"
+          fontWeight="bold"
+          cursor="pointer"
+        >
+          {d.id}
+        </text>
+      ))}
     </svg>
   );
 }
