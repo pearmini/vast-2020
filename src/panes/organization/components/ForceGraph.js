@@ -1,6 +1,7 @@
 import React from "react";
 import * as d3All from "d3";
 import * as d3Array from "d3-array";
+import "array-flat-polyfill";
 
 const d3 = {
   ...d3All,

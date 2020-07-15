@@ -148,7 +148,7 @@ export default function ({ location, connectionData, color, fields }) {
           strokeWidth={2}
           stroke="currentColor"
         ></line>
-        <text x={legendSize / 2 + 15} dy="0.33em" >
+        <text x={legendSize / 2 + 15} dy="0.33em">
           Latitude
         </text>
         <text y={-legendSize / 2 - 15} textAnchor="middle">
