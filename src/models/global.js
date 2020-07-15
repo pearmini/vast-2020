@@ -22,7 +22,7 @@ function readGraphCSV() {
     { name: "g3", url: g3 },
     { name: "g4", url: g4 },
     { name: "g5", url: g5 },
-    { name: "final", url: final },
+    { name: "candidate", url: final },
   ];
   return Promise.all(filelist.map((d) => d3.csv(d.url))).then((data) =>
     Promise.resolve(
@@ -185,7 +185,7 @@ function preprocess(graphList, dc) {
   };
 }
 
-const graphs = ["template", "g1", "g2", "g3", "g4", "g5", "final"];
+const graphs = ["template", "g1", "g2", "g3", "g4", "g5", "candidate"];
 const fields = [
   {
     name: "Phone",

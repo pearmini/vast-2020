@@ -8,6 +8,7 @@ import {
   EyeInvisibleFilled,
   PlusSquareOutlined,
   EyeFilled,
+  PlusOutlined,
 } from "@ant-design/icons";
 
 const Container = styled.div`
@@ -136,14 +137,18 @@ export default function ({
         {title}
         {type !== "combine" && (
           <span>
-            {onCreate && (
-              <PlusSquareOutlined onClick={() => setShowInput(true)} />
-            )}
             {onAdd && (
               <Popover
                 arrowPointAtCenter
                 placement="bottomRight"
-                content={popoverContent}
+                content={
+                  <div>
+                    <ExtraItem onClick={() => setShowInput(true)}>
+                      Graph
+                    </ExtraItem>
+                    <ExtraItem onClick={() => {}}>Edge</ExtraItem>
+                  </div>
+                }
               >
                 <PlusCircleOutlined />
               </Popover>
@@ -188,6 +193,24 @@ export default function ({
             </DataItem>
           ))}
       </div>
+      {type !== "combine" && onAdd && (
+        <Popover arrowPointAtCenter placement="bottom" content={popoverContent}>
+          <div
+            style={{
+              width: "100%",
+              height: 20,
+              borderRadius: 3,
+              border: `1px solid rgba(237, 237, 237, 0.8)`,
+              cursor: "pointer",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <PlusOutlined />
+          </div>
+        </Popover>
+      )}
     </Container>
   );
 }
