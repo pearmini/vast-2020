@@ -8,6 +8,8 @@ import _ from "lodash";
 import { Spin } from "antd";
 import { useResizeObserver } from "beautiful-react-hooks";
 
+const scaleColor = d3.scaleOrdinal(d3.schemeCategory10);
+
 // Since antd pollute the color, we must reset it.
 const Container = styled.div`
   width: 100%;
@@ -192,8 +194,6 @@ function chart(
     .domain(_.uniq(records.map((x) => (x.person as unknown) as string)))
     .range([height - margin.bottom, margin.top])
     .padding(1);
-
-  const scaleColor = d3.scaleOrdinal(d3.schemeCategory10);
 
   svg
     .append("g")
