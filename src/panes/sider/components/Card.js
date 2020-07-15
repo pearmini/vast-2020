@@ -6,7 +6,6 @@ import {
   DeleteFilled,
   PlusCircleOutlined,
   EyeInvisibleFilled,
-  PlusSquareOutlined,
   EyeFilled,
   PlusOutlined,
 } from "@ant-design/icons";

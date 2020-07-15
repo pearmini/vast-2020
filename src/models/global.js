@@ -6,7 +6,7 @@ import g2 from "../data/g2.csv";
 import g3 from "../data/g3.csv";
 import g4 from "../data/g4.csv";
 import g5 from "../data/g5.csv";
-import final from "../data/final.csv"
+import final from "../data/final.csv";
 import dc from "../data/dc.csv";
 
 const d3 = {
@@ -237,13 +237,15 @@ export default {
     mapData: [],
     coData: [],
     proData: [],
+    createGraphs: [],
   },
   reducers: {
     addGraph(state, action) {
       const { key } = action.payload;
-      const { graphs, timeOffSet, dataByKey } = state;
+      const { graphs, timeOffSet, dataByKey, createGraphs } = state;
       return {
         ...state,
+        createGraphs: [...createGraphs, key],
         graphs: [...graphs, key],
         timeOffSet: [...timeOffSet, [key, 0]],
         dataByKey: [...dataByKey, { key, data: [] }],
