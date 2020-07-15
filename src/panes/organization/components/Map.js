@@ -94,9 +94,7 @@ export default function ({ location, connectionData, color, fields, size }) {
     return { nodes: merge(nodes), links: merge(links) };
   }
 
-  useEffect(() => {
-
-  })
+  useEffect(() => {});
 
   return (
     <Container viewBox={[0, 0, width, height]}>
@@ -114,11 +112,6 @@ export default function ({ location, connectionData, color, fields, size }) {
             cy={d.y}
             fill="rgba(200, 200, 200, 0.5)"
           ></circle>
-        ))}
-        {circles.map((d) => (
-          <text key={d.key} x={d.x} y={d.y} fill="black" textAnchor="middle">
-            {d.key}
-          </text>
         ))}
         {nodes.map((d) => (
           <circle
@@ -140,6 +133,18 @@ export default function ({ location, connectionData, color, fields, size }) {
             stroke={color(fields.find((f) => f.value === d.eType).name)}
             opacity={0.5}
           ></line>
+        ))}
+        {circles.map((d) => (
+          <text
+            key={d.key}
+            x={d.x}
+            y={d.y}
+            fill="black"
+            textAnchor="middle"
+            fontWeight="bold"
+          >
+            {`country-${d.key}`}
+          </text>
         ))}
       </g>
     </Container>

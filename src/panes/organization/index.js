@@ -173,6 +173,7 @@ export default connect(({ global }) => ({ ...global }), {
     getData();
   }, [getData]);
 
+
   return (
     <Container>
       <Title>Organization</Title>
