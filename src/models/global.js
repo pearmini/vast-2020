@@ -8,6 +8,7 @@ import g4 from "../data/g4.csv";
 import g5 from "../data/g5.csv";
 import final from "../data/final.csv";
 import dc from "../data/dc.csv";
+import "array-flat-polyfill";
 
 import * as globalApi from "./service";
 
