@@ -14,7 +14,7 @@ const Container = styled.svg`
   height: 100%;
 `;
 
-export default function ({ location, connectionData, color, fields, size }) {
+export default function ({ location, connectionData, color, fields }) {
   const minX = d3.min(location, (d) => d.minX - d.r),
     maxX = d3.max(location, (d) => d.maxX + d.r),
     minY = d3.min(location, (d) => d.minY - d.r),
@@ -24,7 +24,8 @@ export default function ({ location, connectionData, color, fields, size }) {
     innerHeight = maxY - minY,
     margin = { top: 50, right: 20, bottom: 40, left: 30 },
     width = innerWidth + margin.left + margin.right || 0,
-    height = innerHeight + margin.top + margin.bottom || 0;
+    height = innerHeight + margin.top + margin.bottom || 0,
+    size = Math.max(width, height);
 
   const { key, data: list } = connectionData;
 
@@ -37,10 +38,20 @@ export default function ({ location, connectionData, color, fields, size }) {
 
   const { nodes, links } = layout(list);
 
-  const r = d3
-    .scaleLinear()
-    .domain(d3.extent(nodes, (d) => d.value))
-    .range([2, 20]);
+  const minR = 5,
+    maxR = 25,
+    r = d3
+      .scaleLinear()
+      .domain(d3.extent(nodes, (d) => d.value))
+      .range([minR, maxR]);
+
+  const legendSize = 70;
+
+  const legendData = [
+    { value: maxR, key: "a lot" },
+    { value: (maxR + minR) / 2, key: "normal" },
+    { value: minR, key: "few" },
+  ];
 
   function layout(data) {
     const nodes = [],
@@ -94,18 +105,61 @@ export default function ({ location, connectionData, color, fields, size }) {
     return { nodes: merge(nodes), links: merge(links) };
   }
 
-  useEffect(() => {
-
-  })
+  useEffect(() => {});
 
   return (
-    <Container viewBox={[0, 0, width, height]}>
-      <text x={width / 2} y={margin.top - 10} textAnchor="middle">
+    <Container viewBox={[0, 0, size, size]}>
+      <text x={size / 2} y={margin.top - 10} textAnchor="middle">
         {key}
       </text>
-      <g className={`${key}-x-axis-graph`} />
-      <g className={`${key}-y-axis-graph`} />
-      <g transform={`translate(${margin.left}, ${margin.top})`}>
+      <g>
+        {legendData.map((d, index) => (
+          <g
+            key={d.key}
+            transform={`translate(${margin.left}, ${
+              index * 50 + margin.top + 25
+            })`}
+          >
+            <text x={maxR + 10} fill="currentColor">
+              {d.key}
+            </text>
+            <circle r={d.value} fill={`rgba(255, 0, 0, 0.2)`}></circle>
+          </g>
+        ))}
+      </g>
+      <g
+        transform={`translate(${size - margin.right - 20}, ${
+          size - margin.top - 20
+        })`}
+      >
+        <line
+          x1={-legendSize / 2}
+          y1={0}
+          x2={legendSize / 2}
+          y2={0}
+          strokeWidth={1}
+          stroke={"currentColor"}
+        ></line>
+        <line
+          x1={0}
+          y1={legendSize / 2}
+          x2={0}
+          y2={-legendSize / 2}
+          strokeWidth={2}
+          stroke="currentColor"
+        ></line>
+        <text x={legendSize / 2 + 15} dy="0.33em" >
+          Latitude
+        </text>
+        <text y={-legendSize / 2 - 15} textAnchor="middle">
+          Longitude
+        </text>
+      </g>
+      <g
+        transform={`translate(${margin.left + (size - width) / 2}, ${
+          margin.top + (size - height) / 2
+        })`}
+      >
         {circles.map((d) => (
           <circle
             key={d.key}
@@ -114,11 +168,6 @@ export default function ({ location, connectionData, color, fields, size }) {
             cy={d.y}
             fill="rgba(200, 200, 200, 0.5)"
           ></circle>
-        ))}
-        {circles.map((d) => (
-          <text key={d.key} x={d.x} y={d.y} fill="black" textAnchor="middle">
-            {d.key}
-          </text>
         ))}
         {nodes.map((d) => (
           <circle
@@ -140,6 +189,18 @@ export default function ({ location, connectionData, color, fields, size }) {
             stroke={color(fields.find((f) => f.value === d.eType).name)}
             opacity={0.5}
           ></line>
+        ))}
+        {circles.map((d) => (
+          <text
+            key={d.key}
+            x={d.x}
+            y={d.y}
+            fill="black"
+            textAnchor="middle"
+            fontWeight="bold"
+          >
+            {`country-${d.key}`}
+          </text>
         ))}
       </g>
     </Container>

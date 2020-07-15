@@ -6,6 +6,7 @@ import g2 from "../data/g2.csv";
 import g3 from "../data/g3.csv";
 import g4 from "../data/g4.csv";
 import g5 from "../data/g5.csv";
+import final from "../data/final.csv";
 import dc from "../data/dc.csv";
 
 const d3 = {
@@ -21,6 +22,7 @@ function readGraphCSV() {
     { name: "g3", url: g3 },
     { name: "g4", url: g4 },
     { name: "g5", url: g5 },
+    { name: "candidate", url: final },
   ];
   return Promise.all(filelist.map((d) => d3.csv(d.url))).then((data) =>
     Promise.resolve(
@@ -183,7 +185,7 @@ function preprocess(graphList, dc) {
   };
 }
 
-const graphs = ["template", "g1", "g2", "g3", "g4", "g5"];
+const graphs = ["template", "g1", "g2", "g3", "g4", "g5", "candidate"];
 const fields = [
   {
     name: "Phone",
@@ -235,15 +237,18 @@ export default {
     mapData: [],
     coData: [],
     proData: [],
+    createGraphs: [],
   },
   reducers: {
     addGraph(state, action) {
       const { key } = action.payload;
-      const { graphs, timeOffSet } = state;
+      const { graphs, timeOffSet, dataByKey, createGraphs } = state;
       return {
         ...state,
+        createGraphs: [...createGraphs, key],
         graphs: [...graphs, key],
         timeOffSet: [...timeOffSet, [key, 0]],
+        dataByKey: [...dataByKey, { key, data: [] }],
         colorScaleForData: d3
           .scaleOrdinal()
           .domain(graphs)

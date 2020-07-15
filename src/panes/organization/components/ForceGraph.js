@@ -103,54 +103,69 @@ export default function ({
       <text transform={`translate(${width / 2}, 30)`} textAnchor="middle">
         {key}
       </text>
-      {links.map((d) => (
-        <line
-          key={d.index}
-          x1={d.source.x}
-          y1={d.source.y}
-          x2={d.target.x}
-          y2={d.target.y}
-          strokeWidth={Math.sqrt(d.value)}
-          stroke={color(fields.find((f) => f.value === d.eType).name)}
-        />
-      ))}
-      {nodes.map((d) => (
-        <circle
-          key={d.id}
-          r={4}
-          cx={d.x}
-          cy={d.y}
-          cursor="pointer"
-          onClick={() => {
-            const i = selectedPersonnel.indexOf("" + d.id);
-            const newSelectedPersonnel = [...selectedPersonnel];
-            if (i === -1) {
-              newSelectedPersonnel.push("" + d.id);
-            } else {
-              newSelectedPersonnel.splice(i, 1);
-            }
-            set("selectedPersonnel", newSelectedPersonnel);
-          }}
-          fill={circleColorScale(d.id)}
-        >
-          <title>{d.id}</title>
-        </circle>
-      ))}
-      {nodes.map((d) => (
+      {nodes.length === 0 ? (
         <text
-          key={d.id}
-          x={d.x}
-          y={d.y}
-          dx={3}
-          dy={-3}
-          fontSize="10"
-          fill="black"
-          fontWeight="bold"
-          cursor="pointer"
+          transform={`translate(${width / 2}, ${height / 2})`}
+          dy="0.33em"
+          textAnchor="middle"
+          fill="#aaa"
+          fontSize="20"
         >
-          {d.id}
+          no nodes
         </text>
-      ))}
+      ) : (
+        <>
+          {" "}
+          {links.map((d) => (
+            <line
+              key={d.index}
+              x1={d.source.x}
+              y1={d.source.y}
+              x2={d.target.x}
+              y2={d.target.y}
+              strokeWidth={Math.sqrt(d.value)}
+              stroke={color(fields.find((f) => f.value === d.eType).name)}
+            />
+          ))}
+          {nodes.map((d) => (
+            <circle
+              key={d.id}
+              r={4}
+              cx={d.x}
+              cy={d.y}
+              cursor="pointer"
+              onClick={() => {
+                const i = selectedPersonnel.indexOf("" + d.id);
+                const newSelectedPersonnel = [...selectedPersonnel];
+                if (i === -1) {
+                  newSelectedPersonnel.push("" + d.id);
+                } else {
+                  newSelectedPersonnel.splice(i, 1);
+                }
+                set("selectedPersonnel", newSelectedPersonnel);
+              }}
+              fill={circleColorScale(d.id)}
+            >
+              <title>{d.id}</title>
+            </circle>
+          ))}
+          {nodes.map((d) => (
+            <text
+              key={d.id}
+              x={d.x}
+              y={d.y}
+              dx={3}
+              dy={-3}
+              fontSize="10"
+              fill="black"
+              fontWeight="bold"
+              cursor="pointer"
+            >
+              {d.id}
+            </text>
+          ))}
+        </>
+      )}
     </svg>
   );
 }
