@@ -173,7 +173,6 @@ export default connect(({ global }) => ({ ...global }), {
     getData();
   }, [getData]);
 
-
   return (
     <Container>
       <Title>Organization</Title>
@@ -254,7 +253,7 @@ export default connect(({ global }) => ({ ...global }), {
             <>
               <SubTitle>Activity</SubTitle>{" "}
               <Tabs defaultActiveKey="1">
-                <TabPane tab="Temporal" key="1" style={{ overflow: "auto" }}>
+                <TabPane tab="Time" key="1" style={{ overflow: "auto" }}>
                   <Wrapper
                     width={Math.max(selectedGraphs.length * 50, 100) + "%"}
                   >

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Popover, Input, Modal } from "antd";
+import { Popover, Input, Modal, Table, Space, Select } from "antd";
 
 import {
   DeleteFilled,
@@ -9,6 +9,8 @@ import {
   EyeFilled,
   PlusOutlined,
 } from "@ant-design/icons";
+
+const { Option } = Select;
 
 const Container = styled.div`
   margin-bottom: 20px;
@@ -91,9 +93,38 @@ export default function ({
   colorScale = () => "rgba(237, 237, 237, 0)",
   onMouseOver,
   onMouseLeave,
+  onQuery,
+  queryEdgeResult,
+  loading = false,
+  onAddEdge,
+  createGraphs,
 }) {
+  const queryKeys = [
+    "source",
+    "target",
+    "sourceLocation",
+    "targetLocation",
+    "type",
+  ];
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [showQueryEgdes, setShowQueryEdges] = useState(false);
+  const [queryValue, setQueryValue] = useState(initQuery());
+  const [selectedGraph, setSelectedGraph] = useState("");
+  const edgeKeys = [
+    "Source",
+    "eType",
+    "Target",
+    "Time",
+    "Weight",
+    "SourceLocation",
+    "TargetLocation",
+    "SourceLatitude",
+    "SourceLongitude",
+    "TargetLatitude",
+    "TargetLongitude",
+  ];
+
   const popoverContent = (
     <PopoverContainer>
       {extraList.length === 0
@@ -106,10 +137,14 @@ export default function ({
     </PopoverContainer>
   );
 
+  function initQuery() {
+    return {};
+  }
+
   return (
     <Container onMouseLeave={() => onMouseLeave && onMouseLeave()}>
       <Modal
-        title="Create a new graph"
+        title="Create A New Graph"
         visible={showInput}
         onOk={() => {
           if (inputValue !== "") {
@@ -132,6 +167,86 @@ export default function ({
           placeholder="Please input graph key..."
         ></Input>
       </Modal>
+      <Modal
+        title="Query Edges"
+        visible={showQueryEgdes}
+        onOk={() => {
+          onQuery && onQuery(queryValue);
+        }}
+        okText="Query"
+        onCancel={() => {
+          setShowQueryEdges(false);
+        }}
+        width={1000}
+      >
+        <h4>Query Channels</h4>
+        {queryKeys.map((d) => (
+          <div style={{ marginBottom: 10 }}>
+            <Input
+              addonBefore={d}
+              key={d}
+              type="number"
+              defaultValue="mysite"
+              value={queryValue[d]}
+              onChange={(e) => {
+                setQueryValue({ ...queryValue, [d]: e.target.value });
+              }}
+            />
+          </div>
+        ))}
+        <h4>Selected Graph</h4>
+        <Select
+          onChange={setSelectedGraph}
+          value={selectedGraph}
+          style={{ width: 200, marginBottom: 20 }}
+        >
+          {createGraphs &&
+            createGraphs.map((d) => (
+              <Option key={d} value={d}>
+                {d}
+              </Option>
+            ))}
+        </Select>
+        <h4>Query Result</h4>
+        <div style={{ height: 300, overflow: "auto" }}>
+          <Table
+            dataSource={queryEdgeResult || []}
+            loading={loading}
+            columns={[
+              {
+                title: "Add",
+                key: "add",
+                render: (text, record) => (
+                  <Space size="middle" key={text}>
+                    <div style={{ cursor: "pointer" }}>
+                      <PlusOutlined
+                        onClick={() => {
+                          if (selectedGraph === "") {
+                            alert("Please select a graph to add in!");
+                            return;
+                          }
+                          const newEdge = {};
+                          for (let key in record) {
+                            const value = record[key];
+                            newEdge[key] = value;
+                          }
+                          onAddEdge && onAddEdge(selectedGraph, newEdge);
+                          alert("Add Edge Success!");
+                        }}
+                      />
+                    </div>
+                  </Space>
+                ),
+              },
+              ...edgeKeys.map((d) => ({
+                title: d,
+                dataIndex: d,
+                key: d,
+              })),
+            ]}
+          />
+        </div>
+      </Modal>
       <Header>
         {title}
         {type !== "combine" && (
@@ -145,7 +260,9 @@ export default function ({
                     <ExtraItem onClick={() => setShowInput(true)}>
                       Graph
                     </ExtraItem>
-                    <ExtraItem onClick={() => {}}>Edge</ExtraItem>
+                    <ExtraItem onClick={() => setShowQueryEdges(true)}>
+                      Edge
+                    </ExtraItem>
                   </div>
                 }
               >

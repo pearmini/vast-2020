@@ -24,16 +24,30 @@ const Icon = styled.div`
   transition: all 0.5s;
 `;
 
-export default connect(({ global }) => ({ ...global }), {
-  set: (key, value) => ({
-    type: "global/set",
-    payload: { key, value },
-  }),
-  addGraph: (key) => ({
-    type: "global/addGraph",
-    payload: { key },
-  }),
-})(function ({
+export default connect(
+  ({ global, loading }) => ({ ...global, loading: loading.models.global }),
+  {
+    set: (key, value) => ({
+      type: "global/set",
+      payload: { key, value },
+    }),
+    addGraph: (key) => ({
+      type: "global/addGraph",
+      payload: { key },
+    }),
+    queryEdge: (value) => ({
+      type: "global/queryEdge",
+      payload: { value },
+    }),
+    addEdge: (key, value) => ({
+      type: "global/addEdge",
+      payload: {
+        key,
+        edge: value,
+      },
+    }),
+  }
+)(function ({
   selectedGraphs,
   graphs,
   selectedFields,
@@ -46,6 +60,11 @@ export default connect(({ global }) => ({ ...global }), {
   colorScaleForChannels,
   highlightPersonnel,
   addGraph,
+  queryEdge,
+  loading,
+  queryEdgeResult,
+  createGraphs,
+  addEdge,
 }) {
   const extraGraph = graphs.filter(
     (d) => selectedGraphs.find((s) => s === d) === undefined
@@ -83,6 +102,11 @@ export default connect(({ global }) => ({ ...global }), {
           extraList={extraGraph}
           onCreate={addGraph}
           colorScale={colorScaleForData}
+          onQuery={queryEdge}
+          loading={loading}
+          queryEdgeResult={queryEdgeResult}
+          createGraphs={createGraphs}
+          onAddEdge={addEdge}
         />
         <Card
           title="Channels"

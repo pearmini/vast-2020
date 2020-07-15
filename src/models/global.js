@@ -9,6 +9,8 @@ import g5 from "../data/g5.csv";
 import final from "../data/final.csv";
 import dc from "../data/dc.csv";
 
+import * as globalApi from "./service";
+
 const d3 = {
   ...d3All,
   ...d3Array,
@@ -238,17 +240,28 @@ export default {
     coData: [],
     proData: [],
     createGraphs: [],
+    queryEdgeResult: [],
   },
   reducers: {
     addGraph(state, action) {
       const { key } = action.payload;
-      const { graphs, timeOffSet, dataByKey, createGraphs } = state;
+      const {
+        graphs,
+        timeOffSet,
+        dataByKey,
+        createGraphs,
+        graphList,
+        selectedGraphs,
+      } = state;
+      const newGraph = { key, data: [] };
       return {
         ...state,
         createGraphs: [...createGraphs, key],
         graphs: [...graphs, key],
+        graphList: [...graphList, newGraph],
         timeOffSet: [...timeOffSet, [key, 0]],
-        dataByKey: [...dataByKey, { key, data: [] }],
+        dataByKey: [...dataByKey, newGraph],
+        selectedGraphs: [...selectedGraphs, key],
         colorScaleForData: d3
           .scaleOrdinal()
           .domain(graphs)
@@ -263,6 +276,7 @@ export default {
       const i = graphList.indexOf(g);
       newGraphList[i].data.push(edge);
       const payload = preprocess(newGraphList, dc);
+      console.log(edge);
       return {
         ...state,
         ...payload,
@@ -281,6 +295,17 @@ export default {
     },
   },
   effects: {
+    *queryEdge(action, { call, put }) {
+      const { value } = action.payload;
+      const data = yield call(globalApi.queryEdge, value);
+      yield put({
+        type: "set",
+        payload: {
+          key: "queryEdgeResult",
+          value: data,
+        },
+      });
+    },
     *getData(_, { call, put }) {
       const graphList = yield call(readGraphCSV);
       const dc = yield call(readDcCSV);
