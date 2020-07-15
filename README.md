@@ -1,3 +1,5 @@
-# VAST 2020
+# CA2 (Cyber Attacks Analytics)
 
-这里是为了解决 VAST 2020 挑战赛所写的可视化分析系统。
+This is a online analytics for VAST Challenge 2020.
+
+![Alt text](./images/screenshot.png)

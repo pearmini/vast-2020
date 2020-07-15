@@ -16,7 +16,10 @@ const Header = styled.div`
   background: #fff;
   padding: 8px;
   display: flex;
-  align-items: center;
+  align-items: baseline;
+  & > h3 {
+    margin-left: 10px;
+  }
 `;
 
 const Title = styled.span`
@@ -67,7 +70,8 @@ function App() {
   return (
     <Container>
       <Header>
-        <Title>VAST 2020</Title>
+        <Title>CA2</Title>
+        <h3>Cyber Attacks Analytics</h3>
       </Header>
       <Content>
         <Sider width={siderWidth}>
