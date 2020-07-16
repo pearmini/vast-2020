@@ -1,13 +1,6 @@
 import * as d3All from "d3";
 import * as d3Array from "d3-array";
-import template from "../data/template.csv";
-import g1 from "../data/g1.csv";
-import g2 from "../data/g2.csv";
-import g3 from "../data/g3.csv";
-import g4 from "../data/g4.csv";
-import g5 from "../data/g5.csv";
-import final from "../data/final.csv";
-import dc from "../data/dc.csv";
+
 import "array-flat-polyfill";
 
 import * as globalApi from "./service";
@@ -16,30 +9,6 @@ const d3 = {
   ...d3All,
   ...d3Array,
 };
-
-function readGraphCSV() {
-  const filelist = [
-    { name: "template", url: template },
-    { name: "g1", url: g1 },
-    { name: "g2", url: g2 },
-    { name: "g3", url: g3 },
-    { name: "g4", url: g4 },
-    { name: "g5", url: g5 },
-    { name: "candidate", url: final },
-  ];
-  return Promise.all(filelist.map((d) => d3.csv(d.url))).then((data) =>
-    Promise.resolve(
-      data.map((d, index) => ({
-        data: d,
-        key: filelist[index].name,
-      }))
-    )
-  );
-}
-
-function readDcCSV() {
-  return d3.csv(dc);
-}
 
 function offset(time) {
   return +time + (2025 - 1970) * 365 * 24 * 60 * 60;
@@ -58,7 +27,6 @@ function preprocessByEdge(raw) {
 }
 
 function preprocessByKey(raw) {
-  // 暂时先保留电话和邮件的边
   const dataByKey = raw.map(({ data, key }) => ({
     key,
     data: data.map((d) => ({
@@ -131,7 +99,7 @@ function getMap(raw) {
       height: maxY - minY,
       x: (minX + maxX) / 2,
       y: (minY + maxY) / 2,
-      r: Math.max(maxX - minY, maxY - minY) / 2,
+      r: Math.max(maxX - minX, maxY - minY) / 2,
     };
   });
 }
@@ -308,8 +276,8 @@ export default {
       });
     },
     *getData(_, { call, put }) {
-      const graphList = yield call(readGraphCSV);
-      const dc = yield call(readDcCSV);
+      const graphList = yield call(globalApi.readGraphCSV);
+      const dc = yield call(globalApi.readDcCSV);
       const payload = preprocess(graphList, dc);
       yield put({
         type: "save",
