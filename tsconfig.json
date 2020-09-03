@@ -2,10 +2,7 @@
   "compilerOptions": {
     "target": "ES2015",
     "module": "esnext",
-    "lib": [
-      "ESNext",
-      "DOM"
-    ],
+    "lib": ["ESNext", "DOM"],
     "jsx": "react",
     "strict": true,
     "strictNullChecks": true,
@@ -24,7 +21,5 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

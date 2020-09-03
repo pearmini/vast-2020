@@ -32,7 +32,7 @@ export const queryEdge = (value) => {
   });
 };
 
-export const readGraphCSV = ()=> {
+export const readGraphCSV = () => {
   const filelist = [
     { name: "template", url: template },
     { name: "g1", url: g1 },
@@ -50,8 +50,8 @@ export const readGraphCSV = ()=> {
       }))
     )
   );
-}
+};
 
 export const readDcCSV = () => {
   return csv(dc);
-}
+};

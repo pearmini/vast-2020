@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import ResizeObserver from "resize-observer-polyfill";
 
-export default function(ref) {
+export default function (ref) {
   const [size, setSize] = useState({
     width: 0,
-    height: 0
+    height: 0,
   });
 
   const [observer] = useState(
@@ -15,7 +15,7 @@ export default function(ref) {
       }
     })
   );
-  
+
   useEffect(() => {
     const node = ref.current;
     observer.observe(node);

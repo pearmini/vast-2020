@@ -1,4 +1,4 @@
-declare module '*.csv' {
+declare module "*.csv" {
   const url: string;
   export default url;
 }
