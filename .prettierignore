@@ -1,0 +1,5 @@
+.now
+.vercel
+node_modules
+public
+src/data

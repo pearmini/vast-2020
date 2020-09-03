@@ -29,7 +29,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "format": "prettier --write ."
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -52,6 +53,7 @@
     "d3-array": "^2.4.0",
     "dva": "^2.4.1",
     "dva-loading": "^3.0.20",
+    "prettier": "2.1.1",
     "resize-observer-polyfill": "^1.5.1",
     "styled-components": "^5.1.0"
   }
