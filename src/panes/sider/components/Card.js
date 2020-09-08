@@ -181,10 +181,9 @@ export default function ({
       >
         <h4>Query Channels</h4>
         {queryKeys.map((d) => (
-          <div style={{ marginBottom: 10 }}>
+          <div style={{ marginBottom: 10 }} key={d}>
             <Input
               addonBefore={d}
-              key={d}
               type="number"
               defaultValue="mysite"
               value={queryValue[d]}
@@ -217,7 +216,7 @@ export default function ({
                 title: "Add",
                 key: "add",
                 render: (text, record) => (
-                  <Space size="middle" key={text}>
+                  <Space size="middle">
                     <div style={{ cursor: "pointer" }}>
                       <PlusOutlined
                         onClick={() => {

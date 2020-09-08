@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { connect } from "dva";
 import styled from "styled-components";
 import Card from "./components/Card";
 import { CloseCircleFilled } from "@ant-design/icons";
+import * as d3 from "d3";
 
 const Container = styled.div`
   padding: 8px;
@@ -31,6 +32,45 @@ export default connect(
       type: "global/set",
       payload: { key, value },
     }),
+    addSelectedField: (field) => ({
+      type: "global/addSelectedField",
+      payload: {
+        field,
+      },
+    }),
+    removeSelectedField: (index) => ({
+      type: "global/removeSelectedField",
+      payload: {
+        index,
+      },
+    }),
+    addSelectedGraph: (graph) => ({
+      type: "global/addSelectedGraph",
+      payload: {
+        graph,
+      },
+    }),
+    removeSelectedGraph: (index) => ({
+      type: "global/removeSelectedGraph",
+      payload: {
+        index,
+      },
+    }),
+    setHighlightPersonnel: (id) => ({
+      type: "global/setHighlightPersonnel",
+      payload: {
+        id,
+      },
+    }),
+    removeSelectedPersonnel: (index) => ({
+      type: "global/removeSelectedPersonnel",
+      payload: {
+        index,
+      },
+    }),
+    getData: () => ({
+      type: "global/getData",
+    }),
     addGraph: (key) => ({
       type: "global/addGraph",
       payload: { key },
@@ -48,56 +88,58 @@ export default connect(
     }),
   }
 )(function ({
-  selectedGraphs,
   graphs,
-  selectedFields,
   fields,
-  set,
-  selectedPersonnel,
+  selectedGraphs,
+  selectedFields,
   setWidth,
   width,
-  colorScaleForData,
-  colorScaleForChannels,
+  selectedPersonnel,
+  colorsForData,
+  colorsForChannels,
   highlightPersonnel,
+  setHighlightPersonnel,
   addGraph,
   queryEdge,
+  addEdge,
   loading,
   queryEdgeResult,
   createGraphs,
-  addEdge,
+  getData,
+  addSelectedField,
+  removeSelectedField,
+  addSelectedGraph,
+  removeSelectedGraph,
+  removeSelectedPersonnel,
 }) {
   const extraGraph = graphs.filter(
-    (d) => selectedGraphs.find((s) => s === d) === undefined
-  );
-  const extraFields = fields.filter(
-    (d) => selectedFields.find((s) => s === d.value) === undefined
-  );
+      (d) => selectedGraphs.find((s) => s === d) === undefined
+    ),
+    extraFields = fields.filter(
+      (d) => selectedFields.find((s) => s === d.value) === undefined
+    ),
+    colorScaleForData = d3.scaleOrdinal().domain(graphs).range(colorsForData),
+    colorScaleForChannels = d3
+      .scaleOrdinal()
+      .domain(fields.map((d) => d.name))
+      .range(colorsForChannels);
+
+  useEffect(() => {
+    getData();
+  }, [getData]);
 
   return (
     <Container>
       <Icon hide={width === 0}>
         <CloseCircleFilled
-          onClick={() => {
-            if (width === 200) {
-              setWidth(0);
-            } else {
-              setWidth(200);
-            }
-          }}
+          onClick={() => (width === 200 ? setWidth(0) : setWidth(200))}
         />
       </Icon>
       <Wrapper hide={width === 0}>
         <Card
           title="Data"
-          onAdd={(index) => {
-            const newSelectedGraph = [...selectedGraphs, extraGraph[index]];
-            set("selectedGraphs", newSelectedGraph);
-          }}
-          onRemove={(index) => {
-            const newSelectedGraph = [...selectedGraphs];
-            newSelectedGraph.splice(index, 1);
-            set("selectedGraphs", newSelectedGraph);
-          }}
+          onAdd={(index) => addSelectedGraph(extraGraph[index])}
+          onRemove={removeSelectedGraph}
           list={selectedGraphs}
           extraList={extraGraph}
           onCreate={addGraph}
@@ -110,18 +152,8 @@ export default connect(
         />
         <Card
           title="Channels"
-          onAdd={(index) => {
-            const newSelectedFields = [
-              ...selectedFields,
-              extraFields[index].value,
-            ];
-            set("selectedFields", newSelectedFields);
-          }}
-          onRemove={(index) => {
-            const newSelectedFields = [...selectedFields];
-            newSelectedFields.splice(index, 1);
-            set("selectedFields", newSelectedFields);
-          }}
+          onAdd={(index) => addSelectedField(extraFields[index].value)}
+          onRemove={removeSelectedField}
           list={selectedFields.map((d) => fields.find((s) => s.value === d))}
           extraList={extraFields}
           value={(d) => d.name}
@@ -132,24 +164,12 @@ export default connect(
           <Card
             title="Personnel"
             list={selectedPersonnel}
-            onMouseOver={(d) => {
-              set("highlightPersonnel", d);
-            }}
-            onMouseLeave={() => {
-              set("highlightPersonnel", -1);
-            }}
-            onRemove={(index) => {
-              const newSelectedPersonnel = [...selectedPersonnel];
-              newSelectedPersonnel.splice(index, 1);
-              set("selectedPersonnel", newSelectedPersonnel);
-            }}
-            colorScale={(id) => {
-              if (highlightPersonnel === id) {
-                return "red";
-              } else {
-                return "rgba(0, 0, 0, 0)";
-              }
-            }}
+            onMouseOver={(d) => setHighlightPersonnel(d)}
+            onMouseLeave={() => setHighlightPersonnel(-1)}
+            onRemove={removeSelectedPersonnel}
+            colorScale={(id) =>
+              highlightPersonnel === id ? "red" : "rgba(0, 0, 0, 0)"
+            }
           />
         )}
       </Wrapper>

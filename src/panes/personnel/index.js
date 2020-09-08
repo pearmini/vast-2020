@@ -1,8 +1,11 @@
 import React from "react";
 import { connect } from "dva";
 import styled from "styled-components";
-import DcMatrix from "./components/Matrix";
+import * as d3 from "d3";
 import { Tabs, Empty } from "antd";
+
+import DcMatrix from "./components/Matrix";
+
 import Chart from "../../components/Chart";
 import BarChart from "./components/BarChart";
 
@@ -27,17 +30,31 @@ const EmptyWrapper = styled.div`
   transform: translate(-50%, -50%);
 `;
 
-export default connect(({ global }) => ({ ...global }))(function ({
+export default connect(({ global, personnel }) => ({
+  ...global,
+  ...personnel,
+}))(function ({
   selectedPersonnel,
   dataBySource,
   dcLabelData,
   coLabelData,
   traLabelData,
   proLabelData,
-  colorScaleForData,
-  colorScaleForChannels,
+  colorsForData,
+  colorsForChannels,
   highlightPersonnel,
+  fields,
+  graphs,
 }) {
+  const colorScaleForData = d3
+      .scaleOrdinal()
+      .domain(graphs)
+      .range(colorsForData),
+    colorScaleForChannels = d3
+      .scaleOrdinal()
+      .domain(fields.map((d) => d.name))
+      .range(colorsForChannels);
+
   const personnel = selectedPersonnel.map((d) => ({
     list: dataBySource.get(d) || [],
     key: d,

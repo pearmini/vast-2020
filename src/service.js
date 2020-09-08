@@ -1,11 +1,11 @@
-import template from "../data/template.csv";
-import g1 from "../data/g1.csv";
-import g2 from "../data/g2.csv";
-import g3 from "../data/g3.csv";
-import g4 from "../data/g4.csv";
-import g5 from "../data/g5.csv";
-import final from "../data/final.csv";
-import dc from "../data/dc.csv";
+import template from "./data/template.csv";
+import g1 from "./data/g1.csv";
+import g2 from "./data/g2.csv";
+import g3 from "./data/g3.csv";
+import g4 from "./data/g4.csv";
+import g5 from "./data/g5.csv";
+import final from "./data/final.csv";
+import dc from "./data/dc.csv";
 
 import { csv } from "d3";
 

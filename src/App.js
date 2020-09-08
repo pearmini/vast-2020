@@ -66,7 +66,6 @@ const Main = styled.div`
 
 function App() {
   const [siderWidth, setSiderWidth] = useState(200);
-
   return (
     <Container>
       <Header>

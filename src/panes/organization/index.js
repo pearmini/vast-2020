@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { connect } from "dva";
 import { Slider, Select, DatePicker, Tabs } from "antd";
+import * as d3 from "d3";
+import moment from "moment";
 
 import Chart from "../../components/Chart";
-
 import LineChart from "./components/LineChart";
 import ForceGraph from "./components/ForceGraph";
 import ActivityChart from "./components/ActivityChart";
 import Map from "./components/Map";
-import moment from "moment";
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -78,41 +78,57 @@ const Wrapper = styled.div`
   height: 100%;
 `;
 
-export default connect(({ global }) => ({ ...global }), {
-  setTimeOffSet: (value) => ({
-    type: "global/setTimeOffSet",
-    payload: { value },
-  }),
-  set: (key, value) => ({
-    type: "global/set",
-    payload: { key, value },
-  }),
-  getData: () => ({
-    type: "global/getData",
-  }),
-})(function ({
-  timeRange,
+export default connect(
+  ({ global, organization }) => ({ ...global, ...organization }),
+  {
+    setTimeOffSet: (value, selectedTimeOffset) => ({
+      type: "organization/setTimeOffSet",
+      payload: { value, selectedTimeOffset },
+    }),
+    setSelectedTimeRange: (range) => ({
+      type: "organization/setSelectedTimeRange",
+      payload: { range },
+    }),
+    togglePersonnel: (id) => ({
+      type: "global/toggleSelectedPersonnel",
+      payload: { id },
+    }),
+  }
+)(function ({
   selectedTimeRange,
   selectedGraphs,
   timeOffSet,
   selectedFields,
   fields,
-  set,
-  getData,
+  graphs,
   dataByEtype,
   dataByKey,
   selectedPersonnel,
-  colorScaleForData,
-  colorScaleForChannels,
+  colorsForData,
+  colorsForChannels,
   mapData,
   highlightPersonnel,
+  setSelectedTimeRange,
+  setTimeOffSet,
+  togglePersonnel,
 }) {
   const [selectedName, setSelectedName] = useState("template");
   const validTimeOffset = timeOffSet.filter(([name]) => {
     const set = new Set(selectedGraphs);
     return set.has(name);
   });
+
+  const colorScaleForData = d3
+      .scaleOrdinal()
+      .domain(graphs)
+      .range(colorsForData),
+    colorScaleForChannels = d3
+      .scaleOrdinal()
+      .domain(fields.map((d) => d.name))
+      .range(colorsForChannels);
+
   let selectedTimeOffset = validTimeOffset.find((d) => d[0] === selectedName);
+
   if (!selectedTimeOffset && validTimeOffset.length) {
     selectedTimeOffset = validTimeOffset[0];
   }
@@ -169,10 +185,6 @@ export default connect(({ global }) => ({ ...global }), {
       return set.has(d.key);
     });
 
-  useEffect(() => {
-    getData();
-  }, [getData]);
-
   return (
     <Container>
       <Title>Organization</Title>
@@ -180,12 +192,11 @@ export default connect(({ global }) => ({ ...global }), {
         <Card>
           <span>Time Range</span>
           <RangePicker
-            onChange={(_, [startString, endString]) => {
-              const start = (new Date(startString).getTime() / 1000) | 0;
-              const end = (new Date(endString).getTime() / 1000) | 0;
-              set("selectedTimeRange", [start, end]);
-            }}
-            value={[moment(timeRange[0] * 1000), moment(timeRange[1] * 1000)]}
+            onChange={(_, value) => setSelectedTimeRange(value)}
+            value={[
+              moment(selectedTimeRange[0] * 1000),
+              moment(selectedTimeRange[1] * 1000),
+            ]}
           />
         </Card>
         {selectedTimeOffset && (
@@ -206,15 +217,7 @@ export default connect(({ global }) => ({ ...global }), {
               min={0}
               max={365}
               value={selectedTimeOffset[1]}
-              onChange={(v) => {
-                const newTimeOffset = [...timeOffSet];
-                const item = newTimeOffset.find(
-                  (d) => d[0] === selectedTimeOffset[0]
-                );
-                const index = newTimeOffset.indexOf(item);
-                newTimeOffset[index] = [item[0], v];
-                set("timeOffSet", newTimeOffset);
-              }}
+              onChange={(value) => setTimeOffSet(value, selectedTimeOffset)}
             />
           </Card>
         )}
@@ -263,12 +266,12 @@ export default connect(({ global }) => ({ ...global }), {
                           width: selectedGraphs.length ? width / 2 - 4 : width,
                           height: height - 98,
                         }}
+                        key={name}
                       >
                         <ActivityChart
                           key={name}
                           name={name}
                           selectedPersonnel={selectedPersonnel}
-                          set={set}
                           scaleColor={colorScaleForChannels}
                           highlightPersonnel={highlightPersonnel}
                           width={selectedGraphs.length ? width / 2 - 4 : width}
@@ -288,6 +291,7 @@ export default connect(({ global }) => ({ ...global }), {
                           width: connectionData.length ? width / 2 - 4 : width,
                           height: height - 98,
                         }}
+                        key={d.key}
                       >
                         <Map
                           location={mapData}
@@ -316,13 +320,14 @@ export default connect(({ global }) => ({ ...global }), {
                             width: lineData.length ? width / 2 - 4 : width,
                             height: height - 98,
                           }}
+                          key={d.key}
                         >
                           <ForceGraph
                             d={d}
                             timeRange={selectedTimeRange}
                             edges={selectedFields}
                             fields={fields}
-                            set={set}
+                            togglePersonnel={togglePersonnel}
                             selectedPersonnel={selectedPersonnel}
                             color={colorScaleForChannels}
                             highlightPersonnel={highlightPersonnel}
@@ -335,7 +340,7 @@ export default connect(({ global }) => ({ ...global }), {
                       ))}
                   </Wrapper>
                 </TabPane>
-              </Tabs>{" "}
+              </Tabs>
             </>
           )}
         </Chart>

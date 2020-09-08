@@ -355,7 +355,6 @@ function chart(
 
   const legendBounds = legend.node()?.getBoundingClientRect();
   if (legendBounds) {
-    console.log(legendBounds);
     legendBackground.attr("width", legendBounds.width * 1.2 + legendPadding[0]);
     legendBackground.attr(
       "height",

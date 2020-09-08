@@ -13,7 +13,7 @@ export default function ({
   timeRange,
   edges,
   fields,
-  set,
+  togglePersonnel,
   selectedPersonnel,
   color,
   highlightPersonnel,
@@ -135,16 +135,7 @@ export default function ({
               cx={d.x}
               cy={d.y}
               cursor="pointer"
-              onClick={() => {
-                const i = selectedPersonnel.indexOf("" + d.id);
-                const newSelectedPersonnel = [...selectedPersonnel];
-                if (i === -1) {
-                  newSelectedPersonnel.push("" + d.id);
-                } else {
-                  newSelectedPersonnel.splice(i, 1);
-                }
-                set("selectedPersonnel", newSelectedPersonnel);
-              }}
+              onClick={() => togglePersonnel("" + d.id)}
               fill={circleColorScale(d.id)}
             >
               <title>{d.id}</title>
