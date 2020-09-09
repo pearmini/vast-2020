@@ -28,10 +28,6 @@ const Icon = styled.div`
 export default connect(
   ({ global, loading }) => ({ ...global, loading: loading.models.global }),
   {
-    set: (key, value) => ({
-      type: "global/set",
-      payload: { key, value },
-    }),
     addSelectedField: (field) => ({
       type: "global/addSelectedField",
       payload: {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Popover, Input, Modal, Table, Space, Select } from "antd";
+import { Popover, Input, Modal, Table, Space } from "antd";
 
 import {
   DeleteFilled,
@@ -9,8 +9,6 @@ import {
   EyeFilled,
   PlusOutlined,
 } from "@ant-design/icons";
-
-const { Option } = Select;
 
 const Container = styled.div`
   margin-bottom: 20px;
@@ -97,7 +95,7 @@ export default function ({
   queryEdgeResult,
   loading = false,
   onAddEdge,
-  createGraphs,
+  createGraphs = [],
 }) {
   const queryKeys = [
     "source",
@@ -134,6 +132,21 @@ export default function ({
               {value(d)}
             </ExtraItem>
           ))}
+      <div
+        style={{
+          width: "100%",
+          height: 20,
+          borderRadius: 3,
+          border: `1px solid rgba(237, 237, 237, 0.8)`,
+          cursor: "pointer",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+        onClick={() => setShowInput(true)}
+      >
+        <PlusOutlined />
+      </div>
     </PopoverContainer>
   );
 
@@ -179,6 +192,8 @@ export default function ({
         }}
         width={1000}
       >
+        <h4>Selected Graph</h4>
+        <span style={{ marginBottom: "1em" }}>{selectedGraph}</span>
         <h4>Query Channels</h4>
         {queryKeys.map((d) => (
           <div style={{ marginBottom: 10 }} key={d}>
@@ -193,19 +208,6 @@ export default function ({
             />
           </div>
         ))}
-        <h4>Selected Graph</h4>
-        <Select
-          onChange={setSelectedGraph}
-          value={selectedGraph}
-          style={{ width: 200, marginBottom: 20 }}
-        >
-          {createGraphs &&
-            createGraphs.map((d) => (
-              <Option key={d} value={d}>
-                {d}
-              </Option>
-            ))}
-        </Select>
         <h4>Query Result</h4>
         <div style={{ height: 300, overflow: "auto" }}>
           <Table
@@ -254,16 +256,7 @@ export default function ({
               <Popover
                 arrowPointAtCenter
                 placement="bottomRight"
-                content={
-                  <div>
-                    <ExtraItem onClick={() => setShowInput(true)}>
-                      Graph
-                    </ExtraItem>
-                    <ExtraItem onClick={() => setShowQueryEdges(true)}>
-                      Edge
-                    </ExtraItem>
-                  </div>
-                }
+                content={popoverContent}
               >
                 <PlusCircleOutlined />
               </Popover>
@@ -280,6 +273,18 @@ export default function ({
           >
             <span>{value(d)}</span>
             <Right>
+              {type !== "combine" && createGraphs.indexOf(value(d)) !== -1 && (
+                <div style={{ marginRight: 10 }}>
+                  <Icon>
+                    <PlusOutlined
+                      onClick={() => {
+                        setShowQueryEdges(true);
+                        setSelectedGraph(value(d));
+                      }}
+                    />
+                  </Icon>
+                </div>
+              )}
               <Legend color={colorScale(value(d))} />
               <Icon>
                 {type === "combine" ? (
@@ -308,24 +313,6 @@ export default function ({
             </DataItem>
           ))}
       </div>
-      {type !== "combine" && onAdd && (
-        <Popover arrowPointAtCenter placement="bottom" content={popoverContent}>
-          <div
-            style={{
-              width: "100%",
-              height: 20,
-              borderRadius: 3,
-              border: `1px solid rgba(237, 237, 237, 0.8)`,
-              cursor: "pointer",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <PlusOutlined />
-          </div>
-        </Popover>
-      )}
     </Container>
   );
 }
