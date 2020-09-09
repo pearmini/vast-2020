@@ -61,6 +61,14 @@ export default function ({
     simulation.tick();
   }
 
+  const leftNodes = nodes.filter((d) => d.x - width / 2 < 0);
+  const rightNodes = nodes.filter((d) => d.x - width / 2 > 0);
+  const labelHeight = 15;
+  const pathLink = d3
+    .linkHorizontal()
+    .x((d) => d.x)
+    .y((d) => d.y);
+
   function getGraphData(data) {
     const nodes = Array.from(
       new Set(data.flatMap((d) => [+d.Source, +d.Target]))
@@ -116,7 +124,6 @@ export default function ({
         </text>
       ) : (
         <>
-          {" "}
           {links.map((d) => (
             <line
               key={d.index}
@@ -127,6 +134,83 @@ export default function ({
               strokeWidth={Math.sqrt(d.value)}
               stroke={color(fields.find((f) => f.value === d.eType).name)}
             />
+          ))}
+
+          {leftNodes.map((d, index) => (
+            <path
+              key={d.id}
+              stroke="#ddd"
+              strokeWidth={1}
+              fill="none"
+              d={pathLink({
+                source: {
+                  x: 40,
+                  y:
+                    index * labelHeight +
+                    (height - leftNodes.length * labelHeight) / 2,
+                },
+                target: {
+                  x: d.x,
+                  y: d.y,
+                },
+              })}
+            ></path>
+          ))}
+          {rightNodes.map((d, index) => (
+            <path
+              key={d.id}
+              stroke="#ddd"
+              strokeWidth={1}
+              fill="none"
+              d={pathLink({
+                source: {
+                  x: width - 40,
+                  y:
+                    index * labelHeight +
+                    (height - rightNodes.length * labelHeight) / 2,
+                },
+                target: {
+                  x: d.x,
+                  y: d.y,
+                },
+              })}
+            ></path>
+          ))}
+          {rightNodes.map((d, index) => (
+            <text
+              key={d.id}
+              x={width - 30}
+              y={
+                index * labelHeight +
+                (height - rightNodes.length * labelHeight) / 2
+              }
+              fontSize="10"
+              fill="black"
+              fontWeight="bold"
+              cursor="pointer"
+              textAnchor="end"
+              onClick={() => togglePersonnel("" + d.id)}
+            >
+              {d.id}
+            </text>
+          ))}
+          {leftNodes.map((d, index) => (
+            <text
+              key={d.id}
+              x={30}
+              y={
+                index * labelHeight +
+                (height - leftNodes.length * labelHeight) / 2
+              }
+              fontSize="10"
+              fill="black"
+              fontWeight="bold"
+              cursor="pointer"
+              textAnchor="start"
+              onClick={() => togglePersonnel("" + d.id)}
+            >
+              {d.id}
+            </text>
           ))}
           {nodes.map((d) => (
             <circle
@@ -140,21 +224,6 @@ export default function ({
             >
               <title>{d.id}</title>
             </circle>
-          ))}
-          {nodes.map((d) => (
-            <text
-              key={d.id}
-              x={d.x}
-              y={d.y}
-              dx={3}
-              dy={-3}
-              fontSize="10"
-              fill="black"
-              fontWeight="bold"
-              cursor="pointer"
-            >
-              {d.id}
-            </text>
           ))}
         </>
       )}
